@@ -1,5 +1,5 @@
 '''
-Setup task environment for ORL task
+Create payoff structure for ORL task
 '''
 import numpy as np
 
@@ -152,8 +152,10 @@ def main():
     # create payoff structure
     payoff = create_payoff_structure(payoff_dict)
 
+    # check payoff structure
     print(payoff)
     print(payoff.shape)
+    print(payoff.sum(axis=0))
 
 if __name__ == '__main__':
     main()
