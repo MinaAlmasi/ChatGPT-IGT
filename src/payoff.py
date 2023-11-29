@@ -29,6 +29,11 @@ def create_payoff_dict(
         good_r: "good" winnings
         good_freq_l: "good" frequent
         good_infreq_l: "good" infrequent losses
+
+    Returns 
+        payoff_dict: dictionary of payoff values for the ORL task
+
+    (based on ORLRecovery.R)
     '''
     if n_trials % n_struct != 0:
         raise ValueError('n_trials must be divisible by n_struct')
@@ -60,6 +65,8 @@ def deck_vals(deck_name:str, n_struct:int, type_r_val:int, type_l_val:int, freq_
         type_r_val: value of R for a given deck type (i.e., good vs bad, in the current framework it would either be bad_r or good_r)
         type_l_val: value of L for a given deck type (i.e., good vs bad, in the current framework it would either be bad_freq_l or good_freq_l)
         freq_val: probability of frequent losses f
+
+    (based on ORLRecovery.R)
     '''
     valid_deck_names = ['A', 'B', 'C', 'D']
 
@@ -82,6 +89,8 @@ def deck_vals(deck_name:str, n_struct:int, type_r_val:int, type_l_val:int, freq_
 def define_deck_values(payoff_dict:dict):
     '''
     Create deck values for all decks
+
+    (based on ORLRecovery.R)
     '''
     # Extract general properties 
     freq = payoff_dict['freq']
@@ -111,6 +120,8 @@ def create_payoff_structure(payoff_dict:dict):
     
     Returns
         payoff: payoff structure for ORL task
+
+    (based on ORLRecovery.R)
     '''
     # extract general properties
     n_trials = payoff_dict['n_trials']
