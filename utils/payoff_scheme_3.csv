@@ -1,4 +1,4 @@
-trial,win_A,win_B,win_C,win_D,loss_A,loss_B,loss_C,loss_D
+card_number,win_A,win_B,win_C,win_D,loss_A,loss_B,loss_C,loss_D
 1,100,100,50,50,0,0,0,0
 2,120,80,60,40,0,0,0,0
 3,80,110,40,45,150,0,50,0
