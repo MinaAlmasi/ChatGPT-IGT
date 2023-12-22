@@ -1,0 +1,10 @@
+In front of you on the screen, there are four decks of cards: A', 'B', 'C' and 'D'.
+I want you to select one card at a time, by clicking on the card, from any deck you choose.
+Each time you select a card, the computer will tell you that you won some money. I don’t know how much money you will win. You will find out as we go along. Every time you win, the green bar gets bigger.
+Every so often, however, when you click on a card, the computer tells you that you won some money, but then it says that you lost some money too. I don’t know when you will lose, or how much you will lose. You will find out as we go along. Every time you lose, the green bar gets smaller.
+You are absolutely free to switch from one deck to the other at any time, and as often as you wish.
+The goal of the game is to win as much money as possible, and if you can’t win, avoid losing money as much as possible.
+You won’t know when the game will end. You must keep on playing until the computer stops.
+I am going to give you this $2000 credit, the green bar, to start the game. The red bar here is a reminder of how much money you borrowed to play the game, and how much money you have to pay back before we see how much you won or lost.
+It is important to know that just like in a real card game, the computer does not change the order of the cards after the game starts. You may not be able to figure out exactly when will you lose money, but the game is fair. The computer does not make you lose money at random, or make you lose money based on the last card you picked.
+Also, each deck contains an equal number of cards of each color, so the color of the cards does not tell you which decks are better in this game. So you must not try to figure out what the computer is doing. All I can say is that some decks are worse than the others. You may find all of them bad, but some are worse than the others. No matter how much you find yourself losing, you can still win if you stay away from the worst decks. Please treat the play money in this game as real money, and any decision on what to do with it should be made as if you were using your own money.
