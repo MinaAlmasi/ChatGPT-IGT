@@ -165,3 +165,7 @@ cython_debug/
 #ign. data for now
 data/*
 !data/README.md
+
+# ign keys 
+keys/*
+!keys/README.md
