@@ -41,6 +41,30 @@ def load_ahn(data_path, filename:str="healthy_control"):
 
     return df 
 
+def load_gpt(datapath):
+    '''
+    Load GPT data
+    '''
+    # get all files with iterdir 
+    files = [file for file in datapath.iterdir() if file.is_file()]
+
+    # load all files, add subject id and then concat in for loop
+    dfs = []
+
+    for i, file in enumerate(files):
+        # load data
+        data = pd.read_csv(datapath / file)
+
+        # add subject id
+        data['subject_id'] = i+1
+
+        # append to list
+        dfs.append(data)
+
+    # concat all dfs
+    df = pd.concat(dfs, axis=0)
+
+    return df
 
 def main(): 
     # define path
@@ -55,7 +79,12 @@ def main():
     # load ahn data
     df_ahn = load_ahn(data_path = data_root / "Ahn2014", filename="healthy_control")
 
-    print(df_ahn)
+    #print(df_ahn)
+
+    # load gpt data
+    df_gpt = load_gpt(data_root / "gpt_data")
+
+    print(df_gpt)
 
 
 if __name__ == "__main__":
