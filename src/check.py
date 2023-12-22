@@ -4,14 +4,7 @@ Check Steingrover data
 import pathlib
 import pandas as pd
 
-
-def main(): 
-    # define path
-    path = pathlib.Path(__file__).parents[1]
-
-    # path to data 
-    data_path = path / "data" /  "IGTdataSteingroever2014"
-
+def load_steingroever(data_path, study:str=None):
     # load index 
     index = pd.read_csv(data_path / "index_100.csv").reset_index(drop=True)
 
@@ -28,16 +21,46 @@ def main():
     data = pd.concat([index, choice], axis=1)
 
     # filter data to only include Study = "Horstmann"
-    data = data[data['Study'] == "Wood"]
+    if study:
+        data = data[data['Study'] == study]
 
-    count_of_ones = data.apply(lambda row: (row == 4).sum(), axis=1)
+    return data
 
-    # sort from highest to lowest
-    count_of_ones = count_of_ones.sort_values(ascending=False)
+def load_ahn(data_path, filename:str="healthy_control"):
+    '''
+    Load Ahn data
+    '''
+    # load data
+    df = pd.read_csv(data_path / f"IGTdata_{filename}.txt", sep="\t")
+    
+    # filter to only include a single deck
+    df = df[df['deck'] == 4]
 
-    print(count_of_ones.head(20))
+    # group by subject and sum
+    df = df.groupby(['subjID']).count()
 
-    #print(data)
+    # sort by highest deck 
+    df = df.sort_values(by=['deck'], ascending=False)
+    
+    print(df)
+    print(len(df))
+
+
+def main(): 
+    # define path
+    path = pathlib.Path(__file__).parents[1]
+
+    # path to data 
+    data_root = path / "data" 
+
+    # load data
+    df_stein = load_steingroever(data_root /  "IGTdataSteingroever2014")
+
+    # load ahn data
+    df_ahn = load_ahn(data_path = data_root / "Ahn2014", filename="healthy_control")
+
+    print(df_ahn)
+    print(df_stein)
 
 
 if __name__ == "__main__":
