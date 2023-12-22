@@ -46,7 +46,7 @@ def load_gpt(datapath):
     Load GPT data
     '''
     # get all files with iterdir 
-    files = [file for file in datapath.iterdir() if file.is_file()]
+    files = [file for file in datapath.iterdir() if file.is_file() and file.suffix == ".csv"]
 
     # load all files, add subject id and then concat in for loop
     dfs = []
@@ -55,8 +55,8 @@ def load_gpt(datapath):
         # load data
         data = pd.read_csv(datapath / file)
 
-        # add subject id
-        data['subject_id'] = i+1
+        # add subject id from filename
+        data['subjID'] = file.stem
 
         # append to list
         dfs.append(data)
@@ -79,7 +79,7 @@ def main():
     # load ahn data
     df_ahn = load_ahn(data_path = data_root / "Ahn2014", filename="healthy_control")
 
-    #print(df_ahn)
+    print(df_ahn)
 
     # load gpt data
     df_gpt = load_gpt(data_root / "gpt_data")
