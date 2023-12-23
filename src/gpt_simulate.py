@@ -4,6 +4,14 @@ import pandas as pd
 import numpy as np
 import datetime
 import time
+import argparse
+
+def input_parse():
+    parser = argparse.ArgumentParser(description='Run the GPT simulation')
+
+    parser.add_argument("-other", "--other_letters", help='If specified, use other deck names (W, Y, X, Z)', action="store_true")
+
+    return parser.parse_args()
 
 def create_deck_dict(payoff_df, deck_name): 
     '''
@@ -16,7 +24,7 @@ def create_deck_dict(payoff_df, deck_name):
 
     return deck_dict
 
-def create_all_decks():
+def create_all_decks(other=False):
     '''
     Create all decks from the payoff scheme as seperate dicts
     '''
@@ -32,18 +40,32 @@ def create_all_decks():
 
     for deck_name in ["A", "B", "C", "D"]:
         decks[deck_name] = create_deck_dict(df, deck_name)
+    
+    if other: 
+        # replace keys ["A", "B", "C", "D"] with ["W", "Y", "X", "Z"]
+        decks["W"] = decks.pop("A")
+        decks["Y"] = decks.pop("B")
+        decks["X"] = decks.pop("C")
+        decks["Z"] = decks.pop("D")
 
     return decks
 
-
-def initialize(task_desc_path):
-    '''
-    Intialize the OpenAI class and load the task description
-    '''
+def create_task_description(task_desc_path, other=False):
     # load the task description from txt
     with open(task_desc_path / 'modified_task_desc.txt', 'r') as f:
         task_desc = f.read() 
+    
+    # if other, replace A, B, C, D with W, Y, X, Z
+    if other:
+        task_desc = task_desc.replace("A, B, C and D", "W, Y, X and Z")
+        task_desc = task_desc.replace("(A, B, C, D)", "(W, Y, X, Z)")
 
+    return task_desc
+
+def initialize_client():
+    '''
+    Intialize the OpenAI class
+    '''
     # load the api key
     with open(pathlib.Path(__file__).parents[1] / "keys" / 'api_key.txt', 'r') as f:
         key = f.read()
@@ -58,18 +80,30 @@ def initialize(task_desc_path):
         api_key=key
     )
 
-    return task_desc, client
+    return client
 
-
-def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', updated_messages=None):
+def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', updated_messages=None, other=False):
     '''
     Select a deck from the four decks with ChatGPT
     '''
+    if other:
+        letters = ["W", "Y", "X", "Z"]
+        logit_bias = {54: 100, 55: 100, 56: 100, 57: 100}
+    else:
+        letters = ["A", "B", "C", "D"]
+        logit_bias = {32: 100, 33: 100, 34: 100, 35: 100}
+    
+    # define the four decks
+    d1 = letters[0]
+    d2 = letters[1]
+    d3 = letters[2]
+    d4 = letters[3]
+
     # update messages (with previous conversation)
     if updated_messages is None:
         messages = [
             {"role": "system", "content": task_desc},
-            {"role": "user", "content": task_desc + "\n" + "A, B, C or D?"}
+            {"role": "user", "content": task_desc + "\n" + f"'{d1}, {d2}, {d3} or {d4}?'"}
         ]
     else: 
         messages = updated_messages
@@ -88,7 +122,7 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
             temperature=1.4,
             messages=messages,
             max_tokens=1,
-            logit_bias={32: 100, 33: 100, 34: 100, 35: 100} # add bias to A, B, C, D to push ChatGPT to only use letters (banned Deck and deck as well)
+            logit_bias=logit_bias # force ChatGPT to only use letters
             )
 
         # get how many tokens the completion used
@@ -98,7 +132,7 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
         card_selection = completion.choices[0].message.content
 
         # check if card selection is valid
-        if card_selection in ['A', 'B', 'C', 'D']:
+        if card_selection in letters:
             valid_deck = True
         else:
             # add message to messages
@@ -144,7 +178,21 @@ def check_for_empty_deck(selected):
     # if none of them are 60, return None
     return None
 
-def update_messages(messages, card_selection, win, loss, total_earnings, empty_deck):
+def update_messages(messages, card_selection, win, loss, total_earnings, empty_deck, other=False):
+    '''
+    Update ChatGPT messages with card selection and payoff. Add empty deck message if needed.
+    '''
+    if other:
+        letters = ["W", "Y", "X", "Z"]
+    else:
+        letters = ["A", "B", "C", "D"]
+    
+    # define the four decks
+    d1 = letters[0]
+    d2 = letters[1]
+    d3 = letters[2]
+    d4 = letters[3]
+
     # update messages with card selection
     messages.append({"role": "assistant", "content": card_selection})
 
@@ -166,25 +214,24 @@ def update_messages(messages, card_selection, win, loss, total_earnings, empty_d
     # append win/loss message
     messages.append({"role": "user", "content": payoff_message})
 
-    # initialize next round message based on empty deck also
+    # if empty deck is not none, add message to ask for a new deck
     if empty_deck is None:
-        messages.append({"role": "user", "content": "A, B, C or D?"})
-    
-    elif empty_deck == "A":
-        messages.append({"role": "user", "content": "Deck A is empty. B, C or D?"})
-    
-    elif empty_deck == "B":
-        messages.append({"role": "user", "content": "Deck B is empty. A, C or D?"})
-    
-    elif empty_deck == "C":
-        messages.append({"role": "user", "content": "Deck C is empty. A, B or D?"})
-    
-    elif empty_deck == "D":
-        messages.append({"role": "user", "content": "Deck D is empty. A, B or C?"})
+        messages.append({"role": "user", "content": f"'{d1}, {d2}, {d3} or {d4}?'"})
+
+    # if a deck is empty, identify which and ask for a new deck based on the remaining decks
+    else:
+        # create list of decks that are not empty
+        not_empty = [d for d in letters if d != empty_deck]
+
+        # create message
+        new_message = f"Deck {empty_deck} is empty. {not_empty[0]}, {not_empty[1]} or {not_empty[2]}?"
+
+        # append message
+        messages.append({"role": "user", "content": new_message})
 
     return messages
 
-def save_data(data:dict, updated_messages, data_path):
+def save_data(data:dict, updated_messages, data_path, other=False):
     '''
     Save data as a csv and save messages as a txt
     '''
@@ -205,30 +252,48 @@ def save_data(data:dict, updated_messages, data_path):
     # create filename with a date and time (by getting time, formatting it and then adding it to the filename)
     now = datetime.datetime.now()
     formatted_time = now.strftime("%Y%m%d_%H%M%S")
-    filename = f"gpt_{formatted_time}"
 
+    if other:
+        filename = f"gpt_{formatted_time}_WXYZ"
+    else:
+        filename = f"gpt_{formatted_time}_ABCD"
+    
     # save df into data 
     df.to_csv(data_path/ f"{filename}.csv", index=False)
 
     # save messages (logfile-ish)
-    with open(log_path / f"{filename}_messages.txt", 'w') as f:
+    with open(log_path / f"{filename}.txt", 'w') as f:
         f.write(str(updated_messages))
+
         
 def main():
+    args = input_parse()
+
     # get paths
     path = pathlib.Path(__file__).parents[1]
     task_desc_path = path / "utils" / "task_descriptions"
     
     ## SETUP ##
-    # create all decks (A, B, C, D)
-    decks = create_all_decks()
+    # define letters
+    if args.other_letters:
+        letters = ["W", "Y", "X", "Z"]
+    else:
+        letters = ["A", "B", "C", "D"]
 
-    task_desc, client = initialize(task_desc_path)
+    # create all decks (A, B, C, D) or (W, Y, X, Z)
+    decks = create_all_decks(other=args.other_letters)
+    d1, d2, d3, d4 = letters[0], letters[1], letters[2], letters[3] # extract for later use
+
+    # init OpenAI client
+    client = initialize_client()
+
+    # load task desc
+    task_desc = create_task_description(task_desc_path, other=args.other_letters)
 
     # define things for playing
-    trials_to_play = 100
+    trials_to_play = 10
     trials_played = 0
-    selected = {"A":0, "B":0, "C":0, "D":0}
+    selected = {d1:0, d2:0, d3:0, d4:0}
     total_earnings = 2000
     
     data = {}
@@ -238,24 +303,11 @@ def main():
     empty_deck = None
 
     while trials_played < trials_to_play:
-        '''
-        ## TEMP CHUNK START ##
-        # get chatgpt to select a card 
-        messages = [
-            {"role": "system", "content": task_desc},
-            {"role": "user", "content": task_desc + "\n" + "A, B, C or D?"}
-        ]
-
-        # get card selection with numpy, weight A more 
-        if empty_deck == None:
-            card_selection = np.random.choice(['A', 'B', 'C', 'D'], p=[0.8, 0.05, 0.05, 0.1])
-        else:
-            card_selection = "B"
-        '''
-        ## TEMP CHUNK END ##
-
+        # add delay to avoid rate limit
         time.sleep(10)
-        card_selection, messages = select_deck(client, task_desc, updated_messages=updated_messages)
+
+        # select deck
+        card_selection, messages = select_deck(client, task_desc, updated_messages=updated_messages, other=args.other_letters)
 
         # get payoff
         selected, win, loss = get_payoff(card_selection, decks, selected)
@@ -273,7 +325,7 @@ def main():
         data[trials_played] = {"deck": card_selection, "gain": win, "loss": loss}
 
         # update messages
-        updated_messages = update_messages(messages, card_selection, win, loss, total_earnings, empty_deck)
+        updated_messages = update_messages(messages, card_selection, win, loss, total_earnings, empty_deck, other=args.other_letters)
 
         # get the last four dictionaries in the messages list
         print(trials_played, card_selection, win, loss)
@@ -281,7 +333,7 @@ def main():
 
     # save data
     data_path = path / "data" / "gpt_data"
-    save_data(data, updated_messages, data_path=data_path)
+    save_data(data, updated_messages, data_path=data_path, other=args.other_letters)
 
 if __name__ == '__main__':
     main()
