@@ -11,4 +11,4 @@ It is important to know that just like in a real card game, the computer does no
 All I can say is that some decks are worse than the others. You may find all of them bad, but some are worse than the others. No matter how much you find yourself losing, you can still win if you stay away from the worst decks. 
 Please treat the play money in this game as real money, and any decision on what to do with it should be made as if you were using your own money.
 
-Only specify the deck you want (A, B, C, D) - Nothing else!
+Only specify the letter corresponding to the deck you want a card from (A, B, C, D), nothing else! 

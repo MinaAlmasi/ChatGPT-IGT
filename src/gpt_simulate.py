@@ -3,6 +3,7 @@ import pathlib
 import pandas as pd
 import numpy as np
 import datetime
+import time
 
 def create_deck_dict(payoff_df, deck_name): 
     '''
@@ -36,6 +37,9 @@ def create_all_decks():
 
 
 def initialize(task_desc_path):
+    '''
+    Intialize the OpenAI class and load the task description
+    '''
     # load the task description from txt
     with open(task_desc_path / 'modified_task_desc.txt', 'r') as f:
         task_desc = f.read() 
@@ -58,6 +62,9 @@ def initialize(task_desc_path):
 
 
 def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', updated_messages=None):
+    '''
+    Select a deck from the four decks with ChatGPT
+    '''
     # update messages (with previous conversation)
     if updated_messages is None:
         messages = [
@@ -66,34 +73,50 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
         ]
     else: 
         messages = updated_messages
+    
+    # set valid_deck, attempt count and max attempts to not make chatgpt stuck in a loop forever
+    valid_deck = False
+    attempt_count = 0
+    max_attempts = 3 
 
-    # create completion
-    completion = client.chat.completions.create(
-        model=model_endpoint,
-        frequency_penalty=-2,
-        presence_penalty=-2,
-        temperature=0.8,
-        messages=messages,
-        max_tokens=15
-        )
+    while not valid_deck and attempt_count < max_attempts:
+        # create completion
+        completion = client.chat.completions.create(
+            model=model_endpoint,
+            frequency_penalty=-2, # disables all frequency penalty
+            presence_penalty=-2, # disables all presence penalty
+            temperature=1.4,
+            messages=messages,
+            max_tokens=1,
+            logit_bias={32: 100, 33: 100, 34: 100, 35: 100} # add bias to A, B, C, D to push ChatGPT to only use letters (banned Deck and deck as well)
+            )
 
-    # get how many tokens the completion used
-    #print(completion.usage)
+        # get how many tokens the completion used
+        #print(completion.usage)
 
-    # get text response
-    card_selection = completion.choices[0].message.content
+        # get text response
+        card_selection = completion.choices[0].message.content
 
-    # print response
-    print(card_selection)
+        # check if card selection is valid
+        if card_selection in ['A', 'B', 'C', 'D']:
+            valid_deck = True
+        else:
+            # add message to messages
+            messages.append({"role": "assistant", "content": card_selection})
+            messages.append({"role": "user", "content": "Please only specify the letter of the deck you want."})
+            attempt_count += 1
+
+    if not valid_deck:
+        print(messages)
+        raise ValueError("Maximum attemtps reached, ChatGPT failed to select a valid deck.")
 
     return card_selection, messages
 
 
 def get_payoff(card_selection, decks, selected):
-    # check card selection
-    if card_selection not in ['A', 'B', 'C', 'D']:
-        raise ValueError("An invalid deck was chosen!")
-
+    '''
+    Get the payoff for the selected card
+    '''
     # select deck from decks dict
     deck = decks[card_selection]
 
@@ -135,10 +158,10 @@ def update_messages(messages, card_selection, win, loss, total_earnings, empty_d
         payoff_message += "\n" + loss_message
 
     # add total earnings
-    payoff_message += f"\nYour TOTAL EARNINGS are ${total_earnings}."
+    payoff_message += f"\nTOTAL EARNINGS: ${total_earnings}."
 
     # add amount borrowed
-    payoff_message += f"\nYour BORROWED MONEY is $2000."
+    payoff_message += f"\nBORROWED MONEY: $2000."
 
     # append win/loss message
     messages.append({"role": "user", "content": payoff_message})
@@ -162,6 +185,9 @@ def update_messages(messages, card_selection, win, loss, total_earnings, empty_d
     return messages
 
 def save_data(data:dict, updated_messages, data_path):
+    '''
+    Save data as a csv and save messages as a txt
+    '''
     # ensure data_path exists
     data_path.mkdir(parents=True, exist_ok=True)
 
@@ -187,7 +213,7 @@ def save_data(data:dict, updated_messages, data_path):
     # save messages (logfile-ish)
     with open(log_path / f"{filename}_messages.txt", 'w') as f:
         f.write(str(updated_messages))
-    
+        
 def main():
     # get paths
     path = pathlib.Path(__file__).parents[1]
@@ -212,6 +238,7 @@ def main():
     empty_deck = None
 
     while trials_played < trials_to_play:
+        '''
         ## TEMP CHUNK START ##
         # get chatgpt to select a card 
         messages = [
@@ -224,8 +251,11 @@ def main():
             card_selection = np.random.choice(['A', 'B', 'C', 'D'], p=[0.8, 0.05, 0.05, 0.1])
         else:
             card_selection = "B"
+        '''
         ## TEMP CHUNK END ##
-        #card_selection, messages = select_deck(client, task_desc, updated_messages=updated_messages)
+
+        time.sleep(10)
+        card_selection, messages = select_deck(client, task_desc, updated_messages=updated_messages)
 
         # get payoff
         selected, win, loss = get_payoff(card_selection, decks, selected)
@@ -245,11 +275,13 @@ def main():
         # update messages
         updated_messages = update_messages(messages, card_selection, win, loss, total_earnings, empty_deck)
 
-        # save data
-        data_path = path / "data" / "gpt_data"
-        save_data(data, updated_messages, data_path=data_path)
-
+        # get the last four dictionaries in the messages list
         print(trials_played, card_selection, win, loss)
+        print(updated_messages[-4:-1])
+
+    # save data
+    data_path = path / "data" / "gpt_data"
+    save_data(data, updated_messages, data_path=data_path)
 
 if __name__ == '__main__':
     main()
