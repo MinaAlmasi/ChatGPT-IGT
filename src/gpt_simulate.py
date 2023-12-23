@@ -332,7 +332,7 @@ def main():
         print(updated_messages[-4:-1])
 
     # save data
-    data_path = path / "data" / "gpt_data"
+    data_path = path / "data" / "GPTdata"
     save_data(data, updated_messages, data_path=data_path, other=args.other_letters)
 
 if __name__ == '__main__':
