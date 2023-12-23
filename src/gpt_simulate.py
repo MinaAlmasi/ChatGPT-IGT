@@ -9,7 +9,7 @@ import argparse
 def input_parse():
     parser = argparse.ArgumentParser(description='Run the GPT simulation')
 
-    parser.add_argument("-other", "--other_letters", help='If specified, use other deck names (W, Y, X, Z)', action="store_true")
+    parser.add_argument("-other", "--other_letters", help='If specified, use other deck names (E, F, G, H)', action="store_true")
 
     return parser.parse_args()
 
@@ -43,10 +43,10 @@ def create_all_decks(other=False):
     
     if other: 
         # replace keys ["A", "B", "C", "D"] with ["W", "Y", "X", "Z"]
-        decks["W"] = decks.pop("A")
-        decks["Y"] = decks.pop("B")
-        decks["X"] = decks.pop("C")
-        decks["Z"] = decks.pop("D")
+        decks["E"] = decks.pop("A")
+        decks["F"] = decks.pop("B")
+        decks["G"] = decks.pop("C")
+        decks["H"] = decks.pop("D")
 
     return decks
 
@@ -57,8 +57,8 @@ def create_task_description(task_desc_path, other=False):
     
     # if other, replace A, B, C, D with W, Y, X, Z
     if other:
-        task_desc = task_desc.replace("A, B, C and D", "W, Y, X and Z")
-        task_desc = task_desc.replace("(A, B, C, D)", "(W, Y, X, Z)")
+        task_desc = task_desc.replace("A, B, C and D", "E, F, G and H")
+        task_desc = task_desc.replace("(A, B, C, D)", "(E, F, G, H)")
 
     return task_desc
 
@@ -87,8 +87,8 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
     Select a deck from the four decks with ChatGPT
     '''
     if other:
-        letters = ["W", "Y", "X", "Z"]
-        logit_bias = {54: 100, 55: 100, 56: 100, 57: 100}
+        letters = ["E", "F", "G", "H"]
+        logit_bias = {36: 100, 37: 100, 38: 100, 39: 100}
     else:
         letters = ["A", "B", "C", "D"]
         logit_bias = {32: 100, 33: 100, 34: 100, 35: 100}
@@ -183,7 +183,7 @@ def update_messages(messages, card_selection, win, loss, total_earnings, empty_d
     Update ChatGPT messages with card selection and payoff. Add empty deck message if needed.
     '''
     if other:
-        letters = ["W", "Y", "X", "Z"]
+        letters = ["E", "F", "G", "H"]
     else:
         letters = ["A", "B", "C", "D"]
     
@@ -254,7 +254,7 @@ def save_data(data:dict, updated_messages, data_path, other=False):
     formatted_time = now.strftime("%Y%m%d_%H%M%S")
 
     if other:
-        filename = f"gpt_{formatted_time}_WXYZ"
+        filename = f"gpt_{formatted_time}_EFGH"
     else:
         filename = f"gpt_{formatted_time}_ABCD"
     
@@ -276,11 +276,11 @@ def main():
     ## SETUP ##
     # define letters
     if args.other_letters:
-        letters = ["W", "Y", "X", "Z"]
+        letters = ["E", "F", "G", "H"]
     else:
         letters = ["A", "B", "C", "D"]
 
-    # create all decks (A, B, C, D) or (W, Y, X, Z)
+    # create all decks (A, B, C, D) or (W, X, Y, Z)
     decks = create_all_decks(other=args.other_letters)
     d1, d2, d3, d4 = letters[0], letters[1], letters[2], letters[3] # extract for later use
 
@@ -291,7 +291,7 @@ def main():
     task_desc = create_task_description(task_desc_path, other=args.other_letters)
 
     # define things for playing
-    trials_to_play = 10
+    trials_to_play = 100
     trials_played = 0
     selected = {d1:0, d2:0, d3:0, d4:0}
     total_earnings = 2000
