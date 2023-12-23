@@ -165,7 +165,6 @@ cython_debug/
 #ign. data for now
 data/*
 !data/README.md
-!gpt_data
 
 # ign keys 
 keys/*
