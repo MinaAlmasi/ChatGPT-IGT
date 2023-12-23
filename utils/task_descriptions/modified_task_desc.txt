@@ -1,4 +1,4 @@
-In this game, there are four decks of cards: A', 'B', 'C' and 'D'.
+In this game, there are four decks of cards: A, B, C and D.
 
 I want you to select one card at a time, by naming the card, from any deck you choose.
 Each time you select a card, the computer will tell you that you won some money. I don’t know how much money you will win. You will find out as we go along. Every time you win, the 'TOTAL EARNINGS' increases.
