@@ -117,9 +117,9 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
         # create completion
         completion = client.chat.completions.create(
             model=model_endpoint,
-            frequency_penalty=1, # disables all frequency penalty
+            frequency_penalty=2, # disables all frequency penalty
             presence_penalty=1, # disables all presence penalty
-            temperature=1,
+            temperature=1.5,
             messages=messages,
             max_tokens=1,
             logit_bias=logit_bias, # force ChatGPT to only use letters
