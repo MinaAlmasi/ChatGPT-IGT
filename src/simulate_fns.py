@@ -27,10 +27,8 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
     '''
     Simulate ORL data (subject level) to use for parameter recovery
     '''
-
     # define empty arrays
     x = np.full(n_trials, np.nan).astype(int) # choice
-    print(x)
     X = np.zeros(n_trials).astype(int) # outcome / reward
     signX = np.zeros(n_trials) # sign of outcome
     
@@ -49,11 +47,21 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
     x[0] = np.random.choice([0,1,2,3], p=[0.25, 0.25, 0.25, 0.25]) # random choice between 1 and 4 with equal probabilities 
     X[0] = payoff_array[0, x[0]] # set first payoff
 
+    deck_counts = {0: 0, 1: 0, 2: 0, 3: 0} 
+
     for t in range(1, n_trials): # skip first trial
+        # identify which deck was chosen last trial
+        last_chosen_deck = x[t-1]
+        deck_counts[last_chosen_deck] += 1
+
+        # get available decks (those that have been chosen less than 60 times)
+        available_decks = [deck for deck, count in deck_counts.items() if count < 60]
+        print(available_decks)
+        
         # update the sign based on previous outcome
         signX[t] = -1 if X[t-1] < 0 else 1
 
-        for deck in range(4):
+        for deck in available_decks:
             ### EV ### 
             # update expected values using previous outcome and appropriate learning rate
             EV_update[t, deck] = EV[t-1, deck] + a_rew*((X[t-1] - EV[t-1, deck])) if X[t-1] >= 0 else EV[t-1, deck] + a_pun*((X[t-1] - EV[t-1, deck]))
@@ -84,23 +92,23 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
             exp_p[t, deck] = np.exp(theta*V[t, deck])
 
         # calculate probability of choosing each deck
-        for deck in range(4):
-            p[t, deck] = exp_p[t, deck]/np.sum(exp_p[t, :])
-        
-        # choose deck based on probabilities
-        x[t] = np.random.choice([0,1,2,3], p=p[t, :])
+        for deck in available_decks:
+            p[t, deck] = exp_p[t, deck]/np.sum(exp_p[t, available_decks])
 
-        # identify how many times x[t] is present in x
-        n_x = (x == x[t]).sum()
+        # choose deck based on probabilities
+        x[t] = np.random.choice(available_decks, p=p[t, available_decks])
+
+        # get index by subtracting 1 from deck count as index starts at 0 but deck count starts at 1
+        card_number = deck_counts[x[t]]
+        print(card_number)
 
         # get payoff corresponding to the choice and which card we are on in that deck
-        X[t] = payoff_array[n_x, x[t]]
+        X[t] = payoff_array[card_number, x[t]]
 
+    print(payoff_array[59, 2])
+    print(payoff_array.shape)
     # create results dict
     results = {'x': x, 'X': X, 'EV': EV, 'EF': EF, 'PS': PS}
-
-    # turn into df
-    #results = pd.DataFrame(results)
 
     return results
 
