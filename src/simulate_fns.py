@@ -29,7 +29,8 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
     '''
 
     # define empty arrays
-    x = np.zeros(n_trials).astype(int) # choice
+    x = np.full(n_trials, np.nan).astype(int) # choice
+    print(x)
     X = np.zeros(n_trials).astype(int) # outcome / reward
     signX = np.zeros(n_trials) # sign of outcome
     
@@ -57,14 +58,51 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
             # update expected values using previous outcome and appropriate learning rate
             EV_update[t, deck] = EV[t-1, deck] + a_rew*((X[t-1] - EV[t-1, deck])) if X[t-1] >= 0 else EV[t-1, deck] + a_pun*((X[t-1] - EV[t-1, deck]))
 
-            # update ev for the chosen deck
+            # copy appropriate values
             EV[t, deck] = EV_update[t, deck] if deck == x[t-1] else EV[t-1, deck]
 
             ### EF ###
             # update expected frequency of chosen deck
-            EF_chosen[t, deck] = EF[t-1, deck] + a_rew * (signX[t] - EF[t-1, deck]) if X[t-1] >= 0 else EF_chosen[t-1, deck]
+            EF_chosen[t, deck] = EF[t-1, deck] + a_rew * (signX[t] - EF[t-1, deck]) if X[t-1] >= 0 else EF[t-1, deck] + a_pun * (signX[t] - EF[t-1, deck])
+
+            # update expected frequency of NOT chosen deck
+            EF_not[t, deck] = EF[t-1, deck] + a_pun*(-(signX[t]/3) - EF[t-1, deck]) if X[t-1] >= 0 else EF[t-1, deck] + a_rew*(-(signX[t]/3) - EF[t-1, deck])
             
-            
+            # copy appropriate values
+            EF[t, deck] = EF_chosen[t, deck] if deck == x[t-1] else EF_not[t, deck]
+
+            ### PS ###
+            # update probability of switching (ifelse discriminates between chosen and unchosen decks)
+            PS[t, deck] = 1/(1+K) if x[t-1]==deck else PS[t-1, deck]/(1+K)
+
+            ### V ###
+            # update value of each deck
+            V[t, deck] = EV[t, deck] + EF[t, deck]*omega_f + PS[t, deck]*omega_p
+
+            ### SOFTMAX ###
+            # calculate expected probability of choosing each deck
+            exp_p[t, deck] = np.exp(theta*V[t, deck])
+
+        # calculate probability of choosing each deck
+        for deck in range(4):
+            p[t, deck] = exp_p[t, deck]/np.sum(exp_p[t, :])
+        
+        # choose deck based on probabilities
+        x[t] = np.random.choice([0,1,2,3], p=p[t, :])
+
+        # identify how many times x[t] is present in x
+        n_x = (x == x[t]).sum()
+
+        # get payoff corresponding to the choice and which card we are on in that deck
+        X[t] = payoff_array[n_x, x[t]]
+
+    # create results dict
+    results = {'x': x, 'X': X, 'EV': EV, 'EF': EF, 'PS': PS}
+
+    # turn into df
+    #results = pd.DataFrame(results)
+
+    return results
 
 
 def main(): 
@@ -82,8 +120,10 @@ def main():
     payoff_structure = translate_payoff(payoff_df)
 
     # simulate ORL data
-    n_trials = 10
-    simulate_ORL(payoff_structure, n_trials, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
+    n_trials = 100
+    result = simulate_ORL(payoff_structure, n_trials=n_trials, a_rew=0.3, a_pun=0.3, K=2, theta=0.1, omega_f=0.1, omega_p=0.1)
+
+    print(result)
 
 if __name__ == "__main__":
     main()
