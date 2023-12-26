@@ -117,16 +117,20 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
         # create completion
         completion = client.chat.completions.create(
             model=model_endpoint,
-            frequency_penalty=-2, # disables all frequency penalty
-            presence_penalty=-2, # disables all presence penalty
-            temperature=1.4,
+            frequency_penalty=1, # disables all frequency penalty
+            presence_penalty=1, # disables all presence penalty
+            temperature=1,
             messages=messages,
             max_tokens=1,
-            logit_bias=logit_bias # force ChatGPT to only use letters
+            logit_bias=logit_bias, # force ChatGPT to only use letters
+            logprobs=True,
+            top_logprobs=4
             )
 
         # get how many tokens the completion used
-        #print(completion.usage)
+        toplogprobs = completion.choices[0].logprobs.content[0].top_logprobs
+
+        all_logprobs = [(lg.token, lg.logprob) for lg in toplogprobs]
 
         # get text response
         card_selection = completion.choices[0].message.content
@@ -144,7 +148,7 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
         print(messages)
         raise ValueError("Maximum attemtps reached, ChatGPT failed to select a valid deck.")
 
-    return card_selection, messages
+    return card_selection, messages, all_logprobs
 
 
 def get_payoff(card_selection, decks, selected):
@@ -201,7 +205,7 @@ def update_messages(messages, card_selection, win, loss, total_earnings, empty_d
     
     # create loss message
     if loss > 0:
-        loss_message = f"But you LOSE ${loss}!"
+        loss_message = f"But you LOST ${loss}!"
         # add to payoff message
         payoff_message += "\n" + loss_message
 
@@ -291,7 +295,7 @@ def main():
     task_desc = create_task_description(task_desc_path, other=args.other_letters)
 
     # define things for playing
-    trials_to_play = 100
+    trials_to_play = 30
     trials_played = 0
     selected = {d1:0, d2:0, d3:0, d4:0}
     total_earnings = 2000
@@ -302,12 +306,15 @@ def main():
     updated_messages = None
     empty_deck = None
 
+    # seconds to wait (for api) (set to 10 for full generations)
+    secs = 10
+
     while trials_played < trials_to_play:
         # add delay to avoid rate limit
-        time.sleep(10)
+        time.sleep(secs)
 
         # select deck
-        card_selection, messages = select_deck(client, task_desc, updated_messages=updated_messages, other=args.other_letters)
+        card_selection, messages, all_logprobs = select_deck(client, task_desc, updated_messages=updated_messages, other=args.other_letters)
 
         # get payoff
         selected, win, loss = get_payoff(card_selection, decks, selected)
@@ -321,15 +328,20 @@ def main():
         # add a trial played
         trials_played += 1
 
+        # convert logprobs to probabilities
+        probs = [(lg[0], np.exp(lg[1])) for lg in all_logprobs]
+
         # update data dict 
-        data[trials_played] = {"deck": card_selection, "gain": win, "loss": loss}
+        data[trials_played] = {"deck": card_selection, "gain": win, "loss": loss, "probabilities": probs}
 
         # update messages
         updated_messages = update_messages(messages, card_selection, win, loss, total_earnings, empty_deck, other=args.other_letters)
 
         # get the last four dictionaries in the messages list
-        print(trials_played, card_selection, win, loss)
+        print(probs)
         print(updated_messages[-4:-1])
+        print(trials_played, card_selection, win, loss)
+        print()
 
     # save data
     data_path = path / "data" / "GPTdata"

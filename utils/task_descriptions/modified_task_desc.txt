@@ -1,14 +1,4 @@
-In this game, there are four decks of cards: A, B, C and D.
-
-I want you to select one card at a time, by naming the card, from any deck you choose.
-Each time you select a card, the computer will tell you that you won some money. I don’t know how much money you will win. You will find out as we go along. Every time you win, the 'TOTAL EARNINGS' increases.
-Every so often, however, when you select a card, the computer tells you that you won some money, but then it says that you lost some money too. I don’t know when you will lose, or how much you will lose. You will find out as we go along. Every time you lose, the 'TOTAL EARNINGS' gets smaller.
-You are absolutely free to switch from one deck to the other at any time, and as often as you wish.
-The goal of the game is to win as much money as possible, and if you can’t win, avoid losing money as much as possible.
-You won’t know when the game will end. You must keep on playing until the computer stops.
-I am going to give you this $2000 credit, 'TOTAL EARNINGS', to start the game. The 'BORROWED MONEY' here is a reminder of how much money you borrowed to play the game, and how much money you have to pay back before we see how much you won or lost.
-It is important to know that just like in a real card game, the computer does not change the order of the cards after the game starts. You may not be able to figure out exactly when will you lose money, but the game is fair. The computer does not make you lose money at random, or make you lose money based on the last card you picked.
-All I can say is that some decks are worse than the others. You may find all of them bad, but some are worse than the others. No matter how much you find yourself losing, you can still win if you stay away from the worst decks. 
-Please treat the play money in this game as real money, and any decision on what to do with it should be made as if you were using your own money.
-
-Only specify the letter corresponding to the deck you want a card from (A, B, C, D), nothing else! 
+In this card game, choose cards from four decks (A, B, C, D) to earn money. 
+Wins increase your 'TOTAL EARNINGS,' while losses decrease it. 
+You can switch decks anytime, but you may also stay at a deck. 
+Aim to maximize earnings, minimize losses, and avoid the worst decks. The game ends unpredictably. Start with a $2000 credit and remember, some decks are better than others. Choose a deck (A, B, C, D) for each turn.
