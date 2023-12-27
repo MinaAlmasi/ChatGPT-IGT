@@ -23,6 +23,8 @@ infer_theta <- array(NA,c(n_iterations))
 infer_omega_f <- array(NA,c(n_iterations))
 infer_omega_p <- array(NA,c(n_iterations))
 
+start_time = Sys.time()
+
 for (i in 1:n_iterations) {
     
     # get true parameter values
@@ -69,6 +71,10 @@ for (i in 1:n_iterations) {
     infer_omega_f[i] <- MPD(Y$omega_f)
     infer_omega_p[i] <- MPD(Y$omega_p)
 }
+
+end_time <- Sys.time()
+run_time <- end_time - start_time
+print(run_time)
 
 par(mfrow=c(3,2))
 plot(true_a_rew,infer_a_rew)
