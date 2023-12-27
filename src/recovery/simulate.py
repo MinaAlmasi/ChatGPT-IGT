@@ -180,8 +180,8 @@ def simulate_group_data(payoff_array, n_trials, n_subs,
     '''
     # define arrays
     x = np.full((n_subs, n_trials), np.nan).astype(int) # choice
-    X = np.zeros(n_subs, n_trials) # outcome / reward
-    EV = np.zeros(n_subs, n_trials) # sign of outcome
+    X = np.zeros((n_subs, n_trials)) # outcome / reward
+    EV = np.zeros((n_subs, n_trials)) # sign of outcome
 
     # loop over subjects
     for subject in tqdm(range(n_subs)):
@@ -224,9 +224,11 @@ def main():
     #simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.json")
 
     # simulate ORL group data
-    simulate_group_data(payoff_structure, n_trials=100, n_subs=48, 
+    data = simulate_group_data(payoff_structure, n_trials=100, n_subs=48, 
                         mu_a_rew=0.5, mu_a_pun=0.5, mu_K=2.5, mu_theta=2.5, mu_omega_f=0, mu_omega_p=0,
                         sigma_a_rew=0.5, sigma_a_pun=0.5, sigma_K=1, sigma_theta=1, sigma_omega_f=1, sigma_omega_p=1)
+
+    print(data["x"].shape)
 
 
 if __name__ == "__main__":
