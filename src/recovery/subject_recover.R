@@ -77,3 +77,9 @@ plot(true_K,infer_K)
 plot(true_theta,infer_theta)
 plot(true_omega_f,infer_omega_f)
 plot(true_omega_p,infer_omega_p)
+
+# save to df with n_iterations rows and 12 columns (6 true, 6 infer)
+df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p)
+
+# save to csv
+write.csv(df, file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "param_recovery_single_subject.csv"), row.names=FALSE)
