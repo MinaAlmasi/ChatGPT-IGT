@@ -1,11 +1,12 @@
 '''
 functions for simulating ORL data for param recovery
 '''
-
 import numpy as np 
 import pathlib
 import pandas as pd
 from tqdm import tqdm
+from scipy.stats import truncnorm
+
 
 def translate_payoff(payoff_df, scale=True):
     '''
@@ -119,32 +120,7 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
 
     return results
 
-def intialize_empty_arrays(niterations:int=100, variables:list = ['mu_a_rew', 'mu_a_pun', 'mu_K', 'mu_theta', 
-                                                                'mu_omega_f', 'mu_omega_p','lambda_a_rew', 
-                                                                'lambda_a_pun', 'lambda_K', 'lambda_theta', 
-                                                                'lambda_omega_f', 'lambda_omega_p']):
-
-    '''
-    Intialize empty arrays for parameter recovery 
-
-    Args
-        niterations: number of iterations to run
-        variables: list of variables to recover
-
-    Returns
-        data: dictionary of empty arrays for parameter recovery (true and inferred values)
-    
-    (based on ORLRecovery.R)
-    '''
-    data = {}
-
-    for var in variables:
-        data['true_' + var] = np.empty(niterations)
-        data['infer_' + var] = np.empty(niterations)
-
-    return data
-
-def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:float=None, save_path:pathlib.Path=None):
+def simulate_subject_data(n_iterations, payoff_structure, fixed_theta:float=None, save_path:pathlib.Path=None):
     '''
     Run parameter recovery
 
@@ -194,7 +170,43 @@ def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:floa
     if save_path is not None:
         results_df.to_json(save_path)
 
-def main(): 
+def simulate_group_data(payoff_array, n_trials, n_subs,
+                        mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p, 
+                        sigma_a_rew,sigma_a_pun,
+                        sigma_K, sigma_theta, sigma_omega_f,sigma_omega_p
+                         ):
+    '''
+    Simulate hierarchical ORL data (group level) to use for parameter recovery
+    '''
+    # define arrays
+    x = np.full((n_subs, n_trials), np.nan).astype(int) # choice
+    X = np.zeros(n_subs, n_trials) # outcome / reward
+    EV = np.zeros(n_subs, n_trials) # sign of outcome
+
+    # loop over subjects
+    for subject in tqdm(range(n_subs)):
+
+        # free parameters based on normal distribution with GROUP mean and sd (based on a truncated normal distribution using scipy.stats.truncnorm.rvs)
+        a_rew = truncnorm.rvs((0 - mu_a_rew) / sigma_a_rew, (1 - mu_a_rew) / sigma_a_rew, loc=mu_a_rew, scale=sigma_a_rew)
+        a_pun = truncnorm.rvs((0 - mu_a_pun) / sigma_a_pun, (1 - mu_a_pun) / sigma_a_pun, loc=mu_a_pun, scale=sigma_a_pun)
+        K = truncnorm.rvs((0 - mu_K) / sigma_K, (5 - mu_K) / sigma_K, loc=mu_K, scale=sigma_K)
+        theta = truncnorm.rvs((0 - mu_theta) / sigma_theta, (5 - mu_theta) / sigma_theta, loc=mu_theta, scale=sigma_theta)
+        omega_f = truncnorm.rvs((-2 - mu_omega_f) / sigma_omega_f, (2 - mu_omega_f) / sigma_omega_f, loc=mu_omega_f, scale=sigma_omega_f)
+        omega_p = truncnorm.rvs((-2 - mu_omega_p) / sigma_omega_p, (2 - mu_omega_p) / sigma_omega_p, loc=mu_omega_p, scale=sigma_omega_p)
+
+        # run ORL 
+        results = simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_p)
+
+        # extract choice and outcome
+        x[subject] = results['x']
+        X[subject] = results['X']
+
+    # save data
+    data = {'x': x, 'X': X, 'n_trials': n_trials}
+    
+    return data
+
+def main():
     # set random seed
     np.random.seed(2502)
 
@@ -208,11 +220,11 @@ def main():
     # translate payoff structure
     payoff_structure = translate_payoff(payoff_df)
 
-    # initialize empty arrays
-    data = intialize_empty_arrays()
-
     # simulate ORL data
-    simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.json")
+    #simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.json")
+
+    # simulate ORL group data
+    simulate_group_data(payoff_structure, 100, 100, 0.5, 0.5, 2, 1, 0.2, 0.2, 0.5, 0.5, 2, 2, 0.2, 0.2)
 
 
 if __name__ == "__main__":
