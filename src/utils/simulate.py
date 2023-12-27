@@ -26,6 +26,8 @@ def translate_payoff(payoff_df):
 def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_p):
     '''
     Simulate ORL data (subject level) to use for parameter recovery
+
+    Function largely based on ORL.R from UCloud module 3. 
     '''
     # define empty arrays
     x = np.full(n_trials, np.nan).astype(int) # choice
