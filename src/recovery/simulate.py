@@ -5,6 +5,7 @@ functions for simulating ORL data for param recovery
 import numpy as np 
 import pathlib
 import pandas as pd
+from tqdm import tqdm
 
 def translate_payoff(payoff_df, scale=True):
     '''
@@ -40,7 +41,7 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
     '''
     # define empty arrays
     x = np.full(n_trials, np.nan).astype(int) # choice
-    X = np.zeros(n_trials).astype(int) # outcome / reward
+    X = np.zeros(n_trials) # outcome / reward
     signX = np.zeros(n_trials) # sign of outcome
     
     EV_update = np.zeros((n_trials, 4))
@@ -114,7 +115,7 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
         # get payoff corresponding to the choice and which card we are on in that deck
         X[t] = payoff_array[card_number, x[t]]
     
-    results = {'x': x, 'X': X, 'EV': EV, 'EF': EF, 'PS': PS}
+    results = {'x': x, 'X': X, 'n_trials': n_trials} 
 
     return results
 
@@ -143,7 +144,7 @@ def intialize_empty_arrays(niterations:int=100, variables:list = ['mu_a_rew', 'm
 
     return data
 
-def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:float=None):
+def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:float=None, save_path:pathlib.Path=None):
     '''
     Run parameter recovery
 
@@ -153,6 +154,7 @@ def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:floa
         payoff_structure: payoff array (translated from payoff_df to include only outcomes)
         fixed_theta: if not None, fix theta to the given value
     '''
+    results_list = []
 
     for i in tqdm(range(n_iterations)):
         # randomly sample parameters
@@ -171,8 +173,23 @@ def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:floa
         # run simulation with sampled parameters
         results = simulate_ORL(payoff_structure, 100, a_rew, a_pun, K, theta, omega_f, omega_p)
 
-        # print results
-        print(results["x"])
+        # combine results with the sampled parameters
+        results['a_rew'] = a_rew
+        results['a_pun'] = a_pun
+        results['K'] = K
+        results['theta'] = theta
+        results['omega_f'] = omega_f
+        results['omega_p'] = omega_p
+
+        # add results as new row to dataframe
+        results_list.append(results)
+    
+    # convert to df
+    results_df = pd.DataFrame(results_list)
+
+    # write to csv
+    if save_path is not None:
+        results_df.to_csv(save_path)
 
 def main(): 
     # set random seed
@@ -188,11 +205,12 @@ def main():
     # translate payoff structure
     payoff_structure = translate_payoff(payoff_df)
 
-    # simulate ORL data
-    n_trials = 100
-    result = simulate_ORL(payoff_structure, n_trials=n_trials, a_rew=0.3, a_pun=0.3, K=2, theta=0.1, omega_f=0.1, omega_p=0.1)
+    # initialize empty arrays
+    data = intialize_empty_arrays()
 
-    #print(result)
+    # simulate ORL data
+    simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.csv")
+
 
 if __name__ == "__main__":
     main()
