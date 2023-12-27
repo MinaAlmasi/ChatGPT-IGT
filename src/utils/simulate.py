@@ -6,9 +6,16 @@ import numpy as np
 import pathlib
 import pandas as pd
 
-def translate_payoff(payoff_df):
+def translate_payoff(payoff_df, scale=True):
     '''
     Add outcome col to payoff structure
+
+    Args
+        payoff_df: payoff structure dataframe
+        scale: if True, scale payoff structure by 100
+    
+    Returns
+        payoff_array: payoff structure as numpy array
     '''
     # add outcome col for each
     for letter in ['A', 'B', 'C', 'D']:
@@ -20,8 +27,10 @@ def translate_payoff(payoff_df):
     # make into numpy array
     payoff_array = payoff_df.to_numpy()
 
-    return payoff_array
+    if scale:
+        payoff_array = payoff_array/100
 
+    return payoff_array
 
 def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_p):
     '''
@@ -61,7 +70,7 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
         
         # update the sign based on previous outcome
         signX[t] = -1 if X[t-1] < 0 else 1
-
+        
         for deck in available_decks:
             ### EV ### 
             # update expected values using previous outcome and appropriate learning rate
@@ -106,7 +115,7 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
         X[t] = payoff_array[card_number, x[t]]
     
     results = {'x': x, 'X': X, 'EV': EV, 'EF': EF, 'PS': PS}
-    
+
     return results
 
 
