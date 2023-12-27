@@ -161,8 +161,8 @@ def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:floa
         a_rew = np.random.uniform(0, 1)
         a_pun = np.random.uniform(0, 1)
         K = np.random.uniform(0, 5)
-        omega_f = np.random.uniform(0, 1)
-        omega_p = np.random.uniform(0, 1)
+        omega_f = np.random.uniform(-2, 2)
+        omega_p = np.random.uniform(-2, 2)
 
         # randomly sample theta if not fixed is specified
         if fixed_theta is None:
