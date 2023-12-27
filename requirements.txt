@@ -2,3 +2,4 @@ openai
 pandas
 numpy
 tqdm
+scipy
