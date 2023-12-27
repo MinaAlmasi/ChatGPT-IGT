@@ -187,9 +187,12 @@ def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:floa
     # convert to df
     results_df = pd.DataFrame(results_list)
 
+    # add 1 to index to match R indexing
+    results_df.index += 1
+
     # write to csv
     if save_path is not None:
-        results_df.to_csv(save_path)
+        results_df.to_json(save_path)
 
 def main(): 
     # set random seed
@@ -209,7 +212,7 @@ def main():
     data = intialize_empty_arrays()
 
     # simulate ORL data
-    simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.csv")
+    simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.json")
 
 
 if __name__ == "__main__":
