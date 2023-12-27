@@ -2,7 +2,7 @@
 pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 
 # read json
-file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_single_subject_data.json")
+file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_single_subject_data.json")
 data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
@@ -94,4 +94,4 @@ plot(true_omega_p,infer_omega_p)
 df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p)
 
 # save to csv
-write.csv(df, file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "param_recovery_single_subject.csv"), row.names=FALSE)
+write.csv(df, file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_single_subject.csv"), row.names=FALSE)
