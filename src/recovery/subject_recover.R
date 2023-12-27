@@ -5,7 +5,24 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_single_subject_data.json")
 data <- jsonlite::fromJSON(file)
 
+MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
+
 n_iterations <- 10
+
+true_a_rew <- array(NA,c(n_iterations))
+true_a_pun <- array(NA,c(n_iterations))
+true_K <- array(NA,c(n_iterations))
+true_theta <- array(NA,c(n_iterations))
+true_omega_f <- array(NA,c(n_iterations))
+true_omega_p <- array(NA,c(n_iterations))
+
+infer_a_rew <- array(NA,c(n_iterations))
+infer_a_pun <- array(NA,c(n_iterations))
+infer_K <- array(NA,c(n_iterations))
+infer_theta <- array(NA,c(n_iterations))
+infer_omega_f <- array(NA,c(n_iterations))
+infer_omega_p <- array(NA,c(n_iterations))
+
 for (i in 1:n_iterations) {
     
     # get true parameter values
@@ -16,7 +33,6 @@ for (i in 1:n_iterations) {
     omega_f <- as.numeric(data$omega_f[i])
     omega_p <- as.numeric(data$omega_p[i])
 
-
     # define x, X
     x <- data$x[[i]]
     X <- data$X[[i]]
@@ -24,7 +40,7 @@ for (i in 1:n_iterations) {
     # change x from values 0, 1, 2, 3 to 1, 2, 3, 4
     x <- x + 1
 
-    ntrials <- 100
+    ntrials <- 10
 
     # setup jags 
     jags_data <- list("x", "X", "ntrials")
@@ -35,5 +51,29 @@ for (i in 1:n_iterations) {
                 model.file = model_file, n.chains = 2, 
                 n.iter = 100, n.burnin = 10, n.thin = 1, n.cluster = 3)
 
-    print(samples$BUGSoutput) 
+    print(samples$BUGSoutput)
+
+    true_a_rew[i] <- a_rew
+    true_a_pun[i] <- a_pun
+    true_K[i] <- K
+    true_theta[i] <- theta
+    true_omega_f[i] <- omega_f
+    true_omega_p[i] <- omega_p
+    
+    # find maximum a posteriori
+    Y <- samples$BUGSoutput$sims.list
+    infer_a_rew[i] <- MPD(Y$a_rew)
+    infer_a_pun[i] <- MPD(Y$a_pun)
+    infer_K[i] <- MPD(Y$K)
+    infer_theta[i] <- MPD(Y$theta)
+    infer_omega_f[i] <- MPD(Y$omega_f)
+    infer_omega_p[i] <- MPD(Y$omega_p)
 }
+
+par(mfrow=c(3,2))
+plot(true_a_rew,infer_a_rew)
+plot(true_a_pun,infer_a_pun)
+plot(true_K,infer_K)
+plot(true_theta,infer_theta)
+plot(true_omega_f,infer_omega_f)
+plot(true_omega_p,infer_omega_p)
