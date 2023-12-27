@@ -295,7 +295,7 @@ def main():
     task_desc = create_task_description(task_desc_path, other=args.other_letters)
 
     # define things for playing
-    trials_to_play = 30
+    trials_to_play = 100
     trials_played = 0
     selected = {d1:0, d2:0, d3:0, d4:0}
     total_earnings = 2000
@@ -329,7 +329,7 @@ def main():
         trials_played += 1
 
         # convert logprobs to probabilities
-        probs = [(lg[0], np.exp(lg[1])) for lg in all_logprobs]
+        probs = [(lg[0], round(np.exp(lg[1]),6)) for lg in all_logprobs]
 
         # update data dict 
         data[trials_played] = {"deck": card_selection, "gain": win, "loss": loss, "probabilities": probs}
