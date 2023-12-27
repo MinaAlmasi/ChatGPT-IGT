@@ -7,7 +7,6 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.stats import truncnorm
 
-
 def translate_payoff(payoff_df, scale=True):
     '''
     Add outcome col to payoff structure
@@ -33,6 +32,7 @@ def translate_payoff(payoff_df, scale=True):
         payoff_array = payoff_array/100
 
     return payoff_array
+
 
 def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_p):
     '''
@@ -120,9 +120,10 @@ def simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_
 
     return results
 
-def simulate_subject_data(n_iterations, payoff_structure, fixed_theta:float=None, save_path:pathlib.Path=None):
+## SUBJECT-LEVEL ORL ##
+def generate_subject_data(n_iterations, payoff_structure, fixed_theta:float=None, save_path:pathlib.Path=None):
     '''
-    Run parameter recovery
+    Generate simulated data for parameter recovery for a single subject
 
     Args
         n_iterations: number of iterations to run
@@ -170,13 +171,17 @@ def simulate_subject_data(n_iterations, payoff_structure, fixed_theta:float=None
     if save_path is not None:
         results_df.to_json(save_path)
 
-def simulate_group_data(payoff_array, n_trials, n_subs,
+    return results_df
+
+
+## HIERARCHICAL ORL ##
+def simulate_group_ORL(payoff_array, n_trials, n_subs,
                         mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p, 
                         sigma_a_rew,sigma_a_pun,
                         sigma_K, sigma_theta, sigma_omega_f,sigma_omega_p
                          ):
     '''
-    Simulate hierarchical ORL data (group level) to use for parameter recovery
+    Simulate hierarchical ORL (group level) to use for parameter recovery
     '''
     # define arrays
     x = np.full((n_subs, n_trials), np.nan).astype(int) # choice
@@ -185,7 +190,6 @@ def simulate_group_data(payoff_array, n_trials, n_subs,
 
     # loop over subjects
     for subject in tqdm(range(n_subs)):
-
         # free parameters based on normal distribution with GROUP mean and sd (based on a truncated normal distribution using scipy.stats.truncnorm.rvs)
         a_rew = truncnorm.rvs((0 - mu_a_rew) / sigma_a_rew, (1 - mu_a_rew) / sigma_a_rew, loc=mu_a_rew, scale=sigma_a_rew)
         a_pun = truncnorm.rvs((0 - mu_a_pun) / sigma_a_pun, (1 - mu_a_pun) / sigma_a_pun, loc=mu_a_pun, scale=sigma_a_pun)
@@ -206,6 +210,73 @@ def simulate_group_data(payoff_array, n_trials, n_subs,
     
     return data
 
+def generate_group_data(payoff_structure, n_iterations=5, n_subs=48, fixed_theta:tuple=None, save_path:pathlib.Path=None):
+    '''
+    generate group data for parameter recovery
+
+    NB. if fixed_theta is not None, then it should be a tuple of (mu_theta, sigma_theta) values!!
+    '''
+    results_list = []
+
+    for i in range(n_iterations):
+        # mean parameters
+        mu_a_rew = np.random.uniform(0, 1)
+        mu_a_pun = np.random.uniform(0, 1)
+        mu_K = np.random.uniform(0, 2)
+        mu_omega_f = np.random.uniform(-2, 2)
+        mu_omega_p = np.random.uniform(-2, 2)
+
+        # sigma parameters
+        sigma_a_rew = np.random.uniform(0, 0.1)
+        sigma_a_pun = np.random.uniform(0, 0.1)
+        sigma_K = np.random.uniform(0, 0.2)
+        sigma_omega_f = np.random.uniform(0, 0.4)
+        sigma_omega_p = np.random.uniform(0, 0.4)
+
+        if fixed_theta is None:
+            mu_theta = np.random.uniform(0.2, 2)
+            sigma_theta = np.random.uniform(0, 0.2)
+        else:
+            mu_theta = fixed_theta[0]
+            sigma_theta = fixed_theta[1]
+
+        # run ORL
+        results = simulate_group_ORL(payoff_structure, n_trials=100, n_subs=n_subs,
+                            mu_a_rew=mu_a_rew, mu_a_pun=mu_a_pun, mu_K=mu_K, 
+                            mu_theta=mu_theta, mu_omega_f=mu_omega_f, mu_omega_p=mu_omega_p,
+                            sigma_a_rew=sigma_a_rew, sigma_a_pun=sigma_a_pun, sigma_K=sigma_K,
+                            sigma_theta=sigma_theta, sigma_omega_f=sigma_omega_f, sigma_omega_p=sigma_omega_p
+                            )
+
+        # add parameters to results
+        results['mu_a_rew'] = mu_a_rew
+        results['mu_a_pun'] = mu_a_pun
+        results['mu_K'] = mu_K
+        results['mu_theta'] = mu_theta
+        results['mu_omega_f'] = mu_omega_f
+        results['mu_omega_p'] = mu_omega_p
+
+        results['sigma_a_rew'] = sigma_a_rew
+        results['sigma_a_pun'] = sigma_a_pun
+        results['sigma_K'] = sigma_K
+        results['sigma_theta'] = sigma_theta
+        results['sigma_omega_f'] = sigma_omega_f
+        results['sigma_omega_p'] = sigma_omega_p
+
+        results_list.append(results)
+
+    # convert to df
+    results_df = pd.DataFrame(results_list)
+
+    # add 1 to index to match R indexing
+    results_df.index += 1
+
+    # write to csv
+    if save_path is not None:
+        results_df.to_json(save_path)
+
+    return results_df
+
 def main():
     # set random seed
     np.random.seed(2502)
@@ -219,17 +290,22 @@ def main():
     
     # translate payoff structure
     payoff_structure = translate_payoff(payoff_df)
-
+    '''
     # simulate ORL data
-    #simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.json")
-
+    #generate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_data" /  "simulated_single_subject_data.json")
+    
     # simulate ORL group data
-    data = simulate_group_data(payoff_structure, n_trials=100, n_subs=48, 
+    data = simulate_group_ORL(payoff_structure, n_trials=100, n_subs=48, 
                         mu_a_rew=0.5, mu_a_pun=0.5, mu_K=2.5, mu_theta=2.5, mu_omega_f=0, mu_omega_p=0,
                         sigma_a_rew=0.5, sigma_a_pun=0.5, sigma_K=1, sigma_theta=1, sigma_omega_f=1, sigma_omega_p=1)
-
-    print(data["x"].shape)
-
+    
+    # simulate group data
+    '''
+    data = generate_group_data(
+                                payoff_structure, n_iterations=5, n_subs=48, 
+                                fixed_theta=None, 
+                                save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_group_data.json")
+    
 
 if __name__ == "__main__":
     main()
