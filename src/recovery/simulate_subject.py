@@ -35,7 +35,7 @@ def intialize_empty_arrays(niterations:int=100, variables:list = ['mu_a_rew', 'm
 
     return data
 
-def parameter_recovery(n_iterations, data, payoff_structure, fixed_theta:float=None):
+def simulate_subject_data(n_iterations, data, payoff_structure, fixed_theta:float=None):
     '''
     Run parameter recovery
 
@@ -83,7 +83,7 @@ def main():
     data = intialize_empty_arrays()
     
     # simulate ORL data
-    parameter_recovery(100, data, payoff_structure)
+    simulate_subject_data(100, data, payoff_structure)
     
     
     
