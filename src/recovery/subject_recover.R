@@ -7,7 +7,7 @@ data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
-n_iterations <- 10
+n_iterations <- 100
 
 true_a_rew <- array(NA,c(n_iterations))
 true_a_pun <- array(NA,c(n_iterations))
@@ -26,7 +26,7 @@ infer_omega_p <- array(NA,c(n_iterations))
 start_time = Sys.time()
 
 for (i in 1:n_iterations) {
-    
+    start_iteration = Sys.time()
     # get true parameter values
     a_rew <- as.numeric(data$a_rew[i])
     a_pun <- as.numeric(data$a_pun[i])
@@ -42,7 +42,7 @@ for (i in 1:n_iterations) {
     # change x from values 0, 1, 2, 3 to 1, 2, 3, 4
     x <- x + 1
 
-    ntrials <- 10
+    ntrials <- 100
 
     # setup jags 
     jags_data <- list("x", "X", "ntrials")
@@ -50,8 +50,8 @@ for (i in 1:n_iterations) {
     model_file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "models", "ORL.txt")
 
     samples <- jags.parallel(jags_data, inits = NULL, params,
-                model.file = model_file, n.chains = 2, 
-                n.iter = 100, n.burnin = 10, n.thin = 1, n.cluster = 3)
+                model.file = model_file, n.chains = 3, 
+                n.iter = 3000, n.burnin = 10, n.thin = 1, n.cluster = 3)
 
     print(samples$BUGSoutput)
 
@@ -70,6 +70,12 @@ for (i in 1:n_iterations) {
     infer_theta[i] <- MPD(Y$theta)
     infer_omega_f[i] <- MPD(Y$omega_f)
     infer_omega_p[i] <- MPD(Y$omega_p)
+
+    end_iteration <- Sys.time()
+    run_iteration <- round(end_iteration - start_iteration, 2)
+    
+    
+    print(paste0(i, " Iteration time: ", run_iteration, " secs"))
 }
 
 end_time <- Sys.time()
