@@ -224,7 +224,9 @@ def main():
     #simulate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_single_subject_data.json")
 
     # simulate ORL group data
-    simulate_group_data(payoff_structure, 100, 100, 0.5, 0.5, 2, 1, 0.2, 0.2, 0.5, 0.5, 2, 2, 0.2, 0.2)
+    simulate_group_data(payoff_structure, n_trials=100, n_subs=48, 
+                        mu_a_rew=0.5, mu_a_pun=0.5, mu_K=2.5, mu_theta=2.5, mu_omega_f=0, mu_omega_p=0,
+                        sigma_a_rew=0.5, sigma_a_pun=0.5, sigma_K=1, sigma_theta=1, sigma_omega_f=1, sigma_omega_p=1)
 
 
 if __name__ == "__main__":
