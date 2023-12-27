@@ -8,4 +8,6 @@ data <- jsonlite::fromJSON(file)
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
 # print data x for the first group for the first subject
-print(data$x[3])
+group1 <- data$x[1][[1]]
+subject1 <- group1[48, ]
+print(subject1)
