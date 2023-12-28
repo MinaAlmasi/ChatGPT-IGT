@@ -28,8 +28,8 @@ model {
 
   alpha_theta ~ dnorm(0,1)
   mu_theta ~ dnorm(0,1)
-  lambda_theta_grp1 ~ dgamma(0,1)
-  lambda_theta_grp2 ~ dgamma(0,1)
+  lambda_theta_grp1 ~ dgamma(.01,.01)
+  lambda_theta_grp2 ~ dgamma(.01,.01)
 
 
   #----------- Group 1 model -------------------------------------------
