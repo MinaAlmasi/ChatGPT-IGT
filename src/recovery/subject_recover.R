@@ -28,6 +28,8 @@ infer_theta <- array(NA,c(n_iterations))
 infer_omega_f <- array(NA,c(n_iterations))
 infer_omega_p <- array(NA,c(n_iterations))
 
+x_pred <- array(NA,c(n_iterations, ntrials))
+
 start_time = Sys.time()
 
 for (i in 1:n_iterations) {
@@ -76,10 +78,28 @@ for (i in 1:n_iterations) {
     infer_omega_f[i] <- MPD(Y$omega_f)
     infer_omega_p[i] <- MPD(Y$omega_p)
 
+    # inferred choice based on probabilities
+    # set up x_pred for the subject
+    x_pred_subj <- array(NA,c(ntrials))
+
+    # get probabilities for each response per trials and take max
+    for (j in 1:ntrials) {
+        p_predict <- c(
+            MPD(Y$prob_choice[j,1]),
+            MPD(Y$prob_choice[j,2]),
+            MPD(Y$prob_choice[j,3]),
+            MPD(Y$prob_choice[j,4])
+        )
+
+        x_pred_subj[j] <- which.max(p_predict)
+    }
+    
+    # assign to general array
+    x_pred[i,] <- x_pred_subj
+
+    # time
     end_iteration <- Sys.time()
     run_iteration <- round(end_iteration - start_iteration, 2)
-    
-    
     print(paste0(i, " Iteration time: ", run_iteration, " secs"))
 }
 
@@ -96,7 +116,7 @@ plot(true_omega_f,infer_omega_f)
 plot(true_omega_p,infer_omega_p)
 
 # save to df with n_iterations rows and 12 columns (6 true, 6 infer)
-df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p)
+df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p, x_pred)
 
 # save to csv
 write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_single_subject.csv"), row.names=FALSE)
