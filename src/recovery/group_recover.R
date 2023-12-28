@@ -140,7 +140,7 @@ for (i in 1:n_groups) {
     # time 
     end_iteration <- Sys.time()
     run_iteration <- round(end_iteration - start_iteration, 2)
-    print(paste0(i, " Iteration time: ", run_iteration, " secs"))
+    print(paste0(i, " Iteration time: ", run_iteration, " minutes"))
 }   
 
 # save to df with n_groups rows and 12 columns (6 true, 6 infer)

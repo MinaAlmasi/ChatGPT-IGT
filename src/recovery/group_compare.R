@@ -97,7 +97,7 @@ for (i in 1:length(sampled_combinations)) {
     # time 
     end_iteration <- Sys.time()
     run_iteration <- round(end_iteration - start_iteration, 2)
-    print(paste0(i, " Iteration time: ", run_iteration, " secs"))
+    print(paste0(i, " Iteration time: ", run_iteration, " minutes"))
 }
 
 # save df with true and inferred parameters
