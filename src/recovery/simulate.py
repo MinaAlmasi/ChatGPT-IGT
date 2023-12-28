@@ -295,7 +295,7 @@ def main():
     
     # simulate group data
     group = generate_group_data(
-                                payoff_structure, n_iterations=20, n_subs=48, 
+                                payoff_structure, n_iterations=20, n_subs=30, 
                                 fixed_theta=None, 
                                 save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_group_data.json")    
     
