@@ -1,0 +1,202 @@
+model {
+
+  ###### Priors ################
+  alpha_a_rew ~  dnorm(0,1)
+  mu_a_rew ~ dnorm(0,1)
+  lambda_a_rew_grp1 ~ dgamma(.1,.1) 
+  lambda_a_rew_grp2 ~ dgamma(.1,.1) 
+  
+  alpha_a_pun ~  dnorm(0,1)
+  mu_a_pun ~ dnorm(0,1)
+  lambda_a_pun_grp1 ~ dgamma(.1,.1) 
+  lambda_a_pun_grp2 ~ dgamma(.1,.1) 
+
+  alpha_K ~  dnorm(0,1)
+  mu_K ~ dnorm(0,1)
+  lambda_K_grp1 ~ dgamma(.1,.1) 
+  lambda_K_grp2 ~ dgamma(.1,.1) 
+  
+  alpha_omega_f ~  dnorm(0,1)
+  mu_omega_f ~ dnorm(0,1)
+  lambda_omega_f_grp1 ~ dgamma(.1,.1) 
+  lambda_omega_f_grp2 ~ dgamma(.1,.1) 
+  
+  alpha_omega_p ~  dnorm(0,1)
+  mu_omega_p ~ dnorm(0,1)
+  lambda_omega_p_grp1 ~ dgamma(.1,.1) 
+  lambda_omega_p_grp2 ~ dgamma(.1,.1) 
+
+  alpha_theta ~ dnorm(0,1)
+  mu_theta ~ dnorm(0,1)
+  lambda_theta_grp1 ~ dgamma(0,1)
+  lambda_theta_grp2 ~ dgamma(0,1)
+
+
+  #----------- Group 1 model -------------------------------------------
+  for (s in 1:nsubs) {
+
+    a_rew_grp1[s] ~ dnorm((mu_a_rew - (alpha_a_rew/2)),lambda_a_rew_grp1)T(0,1)
+    a_pun_grp1[s] ~ dnorm((mu_a_pun - (alpha_a_pun/2)),lambda_a_pun_grp1)T(0,1)
+    K_grp1[s]  ~ dnorm((mu_K - (alpha_K/2)),lambda_K_grp1)T(0,)
+    theta_grp1[s]  ~ dnorm((mu_theta - (alpha_theta/2)),lambda_theta_grp1)T(0,)
+    omega_f_grp1[s] ~ dnorm((mu_omega_f - (alpha_omega_f/2)),lambda_omega_f_grp1)
+    omega_p_grp1[s] ~ dnorm((mu_omega_p - (alpha_omega_p/2)),lambda_omega_p_grp1)
+  
+    #------ set t1 model variables --------------------------
+      
+    Ev_grp1[s,1,1] <- 0
+    Ev_grp1[s,1,2] <- 0
+    Ev_grp1[s,1,3] <- 0
+    Ev_grp1[s,1,4] <- 0
+      
+    Ef_grp1[s,1,1] <- 0
+    Ef_grp1[s,1,2] <- 0
+    Ef_grp1[s,1,3] <- 0
+    Ef_grp1[s,1,4] <- 0
+      
+    PS_grp1[s,1,1] <- 0
+    PS_grp1[s,1,2] <- 0
+    PS_grp1[s,1,3] <- 0
+    PS_grp1[s,1,4] <- 0
+
+    p_grp1[s,1,1] <- 0
+    p_grp1[s,1,2] <- 0
+    p_grp1[s,1,3] <- 0
+    p_grp1[s,1,4] <- 0
+
+    for (t in 2:ntrials[s]) {
+      
+      #this is imortant mention this as constructing model
+      signX_grp1[s,t] <- ifelse(X_grp1[s,t-1]<0,-1,1)
+      
+      for (d in 1:4) {
+        
+        # -------- Updating expected values ------------------------
+        Ev_update_grp1[s,t,d] <- ifelse(X_grp1[s,t-1]>=0,
+                                  Ev_grp1[s,t-1,d] + a_rew_grp1[s]*((X_grp1[s,t-1]) - Ev_grp1[s,t-1,d]), 
+                                  Ev_grp1[s,t-1,d] + a_pun_grp1[s]*((X_grp1[s,t-1]) - Ev_grp1[s,t-1,d])
+        )
+                              
+        Ev_grp1[s,t,d] <- ifelse(d==x_grp1[s,t-1],Ev_update_grp1[s,t,d],Ev_grp1[s,t-1,d])
+        
+        # -------- Updating expected frequencies ------------------------
+        #update expected frequencies for ALL decks - AS IF THERE WERE ALL CHOSEN
+        Ef_cho_grp1[s,t,d] <- ifelse(X_grp1[s,t-1]>=0, 
+                                Ef_grp1[s,t-1,d] + a_rew_grp1[s]*(signX_grp1[s,t] - Ef_grp1[s,t-1,d]),
+                                Ef_grp1[s,t-1,d] + a_pun_grp1[s]*(signX_grp1[s,t] - Ef_grp1[s,t-1,d])
+        )
+        
+        #update expected frequencies for ALL decks - AS IF THEY WERE ALL UNCHOSEN. 
+        Ef_not_grp1[s,t,d] <- ifelse(X_grp1[s,t-1]>=0, 
+                                Ef_grp1[s,t-1,d] + a_pun_grp1[s]*(-(signX_grp1[s,t]/3) - Ef_grp1[s,t-1,d]),
+                                Ef_grp1[s,t-1,d] + a_rew_grp1[s]*(-(signX_grp1[s,t]/3) - Ef_grp1[s,t-1,d])
+        ) 
+        
+        #copy appropriate values to ef variable
+        Ef_grp1[s,t,d] <- ifelse(d==x_grp1[s,t-1],Ef_cho_grp1[s,t,d],Ef_not_grp1[s,t,d])  
+        #------------------------------------------------------------------
+        
+        #ifelse needed to disctiminate chosen and unchosen decks
+        PS_grp1[s,t,d] <- ifelse(x_grp1[s,t-1]==d,1/(1+K_grp1[s]),PS_grp1[s,t-1,d]/(1+K_grp1[s]))
+        
+        V_grp1[s,t,d] <- Ev_grp1[s,t,d] + (Ef_grp1[s,t,d]*omega_f_grp1[s]) + (PS_grp1[s,t,d]*omega_p_grp1[s])
+        
+        exp_p_grp1[s,t,d] <- exp(theta_grp1[s]*V_grp1[s,t,d])
+        
+      }
+      
+      for (d in 1:4) {
+        p_grp1[s,t,d] <- exp_p_grp1[s,t,d]/sum(exp_p_grp1[s,t,])
+      }
+        
+      x_grp1[s,t] ~ dcat(p_grp1[s,t,])
+      
+    }
+  }
+
+  ###################################################
+  #-------- Group 2 model----------------------------
+  ###################################################
+  for (s in 1:nsubs) {
+
+    a_rew_grp2[s] ~ dnorm((mu_a_rew + (alpha_a_rew/2)),lambda_a_rew_grp2)T(0,1)
+    a_pun_grp2[s] ~ dnorm((mu_a_pun + (alpha_a_pun/2)),lambda_a_pun_grp2)T(0,1)
+    K_grp2[s]  ~ dnorm((mu_K + (alpha_K/2)),lambda_K_grp2)T(0,)
+    theta_grp2[s] ~ dnorm((mu_theta - (alpha_theta/2)), lambda_theta_grp2)T(0,)
+    omega_f_grp2[s] ~ dnorm((mu_omega_f + (alpha_omega_f/2)),lambda_omega_f_grp2)
+    omega_p_grp2[s] ~ dnorm((mu_omega_p + (alpha_omega_p/2)),lambda_omega_p_grp2)
+  
+    #------ set t1 model variables --------------------------
+      
+    Ev_grp2[s,1,1] <- 0
+    Ev_grp2[s,1,2] <- 0
+    Ev_grp2[s,1,3] <- 0
+    Ev_grp2[s,1,4] <- 0
+      
+    Ef_grp2[s,1,1] <- 0
+    Ef_grp2[s,1,2] <- 0
+    Ef_grp2[s,1,3] <- 0
+    Ef_grp2[s,1,4] <- 0
+      
+    PS_grp2[s,1,1] <- 0
+    PS_grp2[s,1,2] <- 0
+    PS_grp2[s,1,3] <- 0
+    PS_grp2[s,1,4] <- 0
+
+    p_grp2[s,1,1] <- 0
+    p_grp2[s,1,2] <- 0
+    p_grp2[s,1,3] <- 0
+    p_grp2[s,1,4] <- 0
+
+    for (t in 2:ntrials[s]) {
+      
+      #this is imortant mention this as constructing model
+      signX_grp2[s,t] <- ifelse(X_grp2[s,t-1]<0,-1,1)
+      
+      for (d in 1:4) {
+        
+        # -------- Updating expected values ------------------------
+        Ev_update_grp2[s,t,d] <- ifelse(X_grp2[s,t-1]>=0,
+                                  Ev_grp2[s,t-1,d] + a_rew_grp2[s]*((X_grp2[s,t-1]) - Ev_grp2[s,t-1,d]), 
+                                  Ev_grp2[s,t-1,d] + a_pun_grp2[s]*((X_grp2[s,t-1]) - Ev_grp2[s,t-1,d])
+        )
+                              
+        Ev_grp2[s,t,d] <- ifelse(d==x_grp2[s,t-1],Ev_update_grp2[s,t,d],Ev_grp2[s,t-1,d])
+        
+        # -------- Updating expected frequencies ------------------------
+        #update expected frequencies for ALL decks - AS IF THERE WERE ALL CHOSEN
+        Ef_cho_grp2[s,t,d] <- ifelse(X_grp2[s,t-1]>=0, 
+                                Ef_grp2[s,t-1,d] + a_rew_grp2[s]*(signX_grp2[s,t] - Ef_grp2[s,t-1,d]),
+                                Ef_grp2[s,t-1,d] + a_pun_grp2[s]*(signX_grp2[s,t] - Ef_grp2[s,t-1,d])
+        )
+        
+        #update expected frequencies for ALL decks - AS IF THEY WERE ALL UNCHOSEN. 
+        Ef_not_grp2[s,t,d] <- ifelse(X_grp2[s,t-1]>=0, 
+                                Ef_grp2[s,t-1,d] + a_pun_grp2[s]*(-(signX_grp2[s,t]/3) - Ef_grp2[s,t-1,d]),
+                                Ef_grp2[s,t-1,d] + a_rew_grp2[s]*(-(signX_grp2[s,t]/3) - Ef_grp2[s,t-1,d])
+        ) 
+        
+        #copy appropriate values to ef variable
+        Ef_grp2[s,t,d] <- ifelse(d==x_grp2[s,t-1],Ef_cho_grp2[s,t,d],Ef_not_grp2[s,t,d])  
+        #------------------------------------------------------------------
+        
+        #ifelse needed to disctiminate chosen and unchosen decks
+        PS_grp2[s,t,d] <- ifelse(x_grp2[s,t-1]==d,1/(1+K_grp2[s]),PS_grp2[s,t-1,d]/(1+K_grp2[s]))
+        
+        V_grp2[s,t,d] <- Ev_grp2[s,t,d] + Ef_grp2[s,t,d]*omega_f_grp2[s] + PS_grp2[s,t,d]*omega_p_grp2[s]
+        
+        exp_p_grp2[s,t,d] <- exp(theta_grp2[s]*V_grp2[s,t,d])
+        
+      }
+      
+      for (d in 1:4) {
+        p_grp2[s,t,d] <- exp_p_grp2[s,t,d]/sum(exp_p_grp2[s,t,])
+      }
+        
+      x_grp2[s,t] ~ dcat(p_grp2[s,t,])
+      
+    }
+  }
+
+
+}
