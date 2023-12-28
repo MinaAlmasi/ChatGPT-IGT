@@ -60,12 +60,12 @@ for (i in 1:length(sampled_combinations)) {
     X_grp2 <- grp2_data$X[[1]]
 
     # change x from values 0, 1, 2, 3 to 1, 2, 3, 4
-    grp1_x <- grp1_x + 1
-    grp2_x <- grp2_x + 1
+    x_grp1 <- x_grp1 + 1
+    x_grp2 <- x_grp2 + 1
 
     # define ntrials and nsubs
-    ntrials <- rep(dim(x)[2], dim(x)[1]) # trials, subjects (defined by the dimensions of the choices)
-    nsubs <- dim(x)[1]
+    ntrials <- rep(dim(x_grp1)[2], dim(x_grp1)[1]) # trials, subjects (defined by the dimensions of the choices)
+    nsubs <- dim(x_grp1)[1]
 
     # setup jags 
     print("Intializing JAGS ...")
