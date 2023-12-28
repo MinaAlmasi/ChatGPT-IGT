@@ -5,7 +5,8 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 set.seed(2502)
 
 # read json
-file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_group_data.json")
+root_path <- "~/Desktop" # root_path = "work"
+file <- file.path(root_path, "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_group_data.json")
 data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
@@ -73,19 +74,19 @@ for (i in 1:n_iterations) {
     sigma_omega_f <- as.numeric(data$sigma_omega_f[i])
     sigma_omega_p <- as.numeric(data$sigma_omega_p[i])
 
-
     ntrials <- rep(dim(x)[2], dim(x)[1]) # trials, subjects (defined by the dimensions of the choices)
     
     # setup jags
     jags_data <- list("x", "X", "ntrials", "nsubs")
     params <- c("mu_a_rew", "mu_a_pun", "mu_K", "mu_theta", "mu_omega_f", "mu_omega_p",
-                "sigma_a_rew", "sigma_a_pun", "sigma_K", "sigma_theta", "sigma_omega_f", "sigma_omega_p")
+                "lambda_a_rew", "lambda_a_pun", "lambda_K", "lambda_theta", "lambda_omega_f", "lambda_omega_p")
     
-    model_file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "models", "hier_ORL.txt")
+    model_file <- file.path(root_path, "dm-code", "ChatGPT-IGT", "models", "hier_ORL.txt")
 
+    print("Intializing JAGS ...")
     samples <- jags.parallel(jags_data, inits = NULL, params,
                 model.file = model_file, n.chains = 3, 
-                n.iter = 100, n.burnin = 10, n.thin = 1, n.cluster = 3)
+                n.iter = 3000, n.burnin = 10, n.thin = 1, n.cluster = 3)
 
     print(samples$BUGSoutput)
 
@@ -130,7 +131,7 @@ for (i in 1:n_iterations) {
 
     # save to csv
     filename = paste0("param_recovery_group_", i, ".csv")
-    write.csv(df, file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "groups", filename))
+    write.csv(df, file.path(root_path, "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "groups", filename))
     
     # time 
     end_iteration <- Sys.time()
@@ -143,7 +144,7 @@ df <- data.frame(true_mu_a_rew, true_mu_a_pun, true_mu_K, true_mu_theta, true_mu
                  true_lambda_a_rew, true_lambda_a_pun, true_lambda_K, true_lambda_theta, true_lambda_omega_f, true_lambda_omega_p, infer_lambda_a_rew, infer_lambda_a_pun, infer_lambda_K, infer_lambda_theta, infer_lambda_omega_f, infer_lambda_omega_p)
 
 # save to csv
-write.csv(df, file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_group_ALL.csv"), row.names=FALSE)
+write.csv(df, file.path(root_path, "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_group_ALL.csv"), row.names=FALSE)
 
 end_time <- Sys.time()
 run_time <- end_time - start_time
