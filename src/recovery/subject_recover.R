@@ -1,6 +1,9 @@
 #install.packages("pacman")
 pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 
+# set seed
+set.seed(2502)
+
 # read json
 file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_single_subject_data.json")
 data <- jsonlite::fromJSON(file)
