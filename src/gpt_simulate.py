@@ -82,7 +82,7 @@ def initialize_client():
 
     return client
 
-def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', updated_messages=None, other=False):
+def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', updated_messages=None, other=False, empty_deck=None):
     '''
     Select a deck from the four decks with ChatGPT
     '''
@@ -108,6 +108,11 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
     else: 
         messages = updated_messages
     
+    # remove empty deck from letters
+    if empty_deck:
+        # remove empty deck from letters
+        letters.remove(empty_deck)
+
     # set valid_deck, attempt count and max attempts to not make chatgpt stuck in a loop forever
     valid_deck = False
     attempt_count = 0
@@ -141,12 +146,14 @@ def select_deck(client, task_desc, model_endpoint = 'gpt-3.5-turbo-1106', update
         else:
             # add message to messages
             messages.append({"role": "assistant", "content": card_selection})
-            messages.append({"role": "user", "content": "Please only specify the letter of the deck you want."})
+            available_decks = ", ".join(letters)
+            messages.append({"role": "user", "content": f"'Please only specify the letter of the deck you want. The available decks are {available_decks}'"})
             attempt_count += 1
+            time.sleep(5)
 
     if not valid_deck:
         print(messages)
-        raise ValueError("Maximum attemtps reached, ChatGPT failed to select a valid deck.")
+        raise ValueError("Maximum attempts reached, ChatGPT failed to select a valid deck.")
 
     return card_selection, messages, all_logprobs
 
@@ -314,7 +321,7 @@ def main():
         time.sleep(secs)
 
         # select deck
-        card_selection, messages, all_logprobs = select_deck(client, task_desc, updated_messages=updated_messages, other=args.other_letters)
+        card_selection, messages, all_logprobs = select_deck(client, task_desc, updated_messages=updated_messages, other=args.other_letters, empty_deck=empty_deck)
 
         # get payoff
         selected, win, loss = get_payoff(card_selection, decks, selected)
