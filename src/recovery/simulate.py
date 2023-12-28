@@ -127,7 +127,6 @@ def generate_subject_data(n_iterations, payoff_structure, fixed_theta:float=None
 
     Args
         n_iterations: number of iterations to run
-        data: dictionary of empty arrays for parameter recovery (true and inferred values)
         payoff_structure: payoff array (translated from payoff_df to include only outcomes)
         fixed_theta: if not None, fix theta to the given value
     '''
@@ -210,7 +209,7 @@ def simulate_group_ORL(payoff_array, n_trials, n_subs,
     
     return data
 
-def generate_group_data(payoff_structure, n_iterations=5, n_subs=48, fixed_theta:tuple=None, save_path:pathlib.Path=None):
+def generate_group_data(payoff_structure, n_iterations=20, n_subs=48, fixed_theta:tuple=None, save_path:pathlib.Path=None):
     '''
     generate group data for parameter recovery
 
@@ -222,7 +221,7 @@ def generate_group_data(payoff_structure, n_iterations=5, n_subs=48, fixed_theta
         # mean parameters
         mu_a_rew = np.random.uniform(0, 1)
         mu_a_pun = np.random.uniform(0, 1)
-        mu_K = np.random.uniform(0, 2)
+        mu_K = np.random.uniform(0, 5)
         mu_omega_f = np.random.uniform(-2, 2)
         mu_omega_p = np.random.uniform(-2, 2)
 
@@ -234,7 +233,7 @@ def generate_group_data(payoff_structure, n_iterations=5, n_subs=48, fixed_theta
         sigma_omega_p = np.random.uniform(0, 0.4)
 
         if fixed_theta is None:
-            mu_theta = np.random.uniform(0.2, 2)
+            mu_theta = np.random.uniform(0, 5)
             sigma_theta = np.random.uniform(0, 0.2)
         else:
             mu_theta = fixed_theta[0]
@@ -290,22 +289,15 @@ def main():
     
     # translate payoff structure
     payoff_structure = translate_payoff(payoff_df)
-    '''
+
     # simulate ORL data
-    #generate_subject_data(100, data, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_data" /  "simulated_single_subject_data.json")
-    
-    # simulate ORL group data
-    data = simulate_group_ORL(payoff_structure, n_trials=100, n_subs=48, 
-                        mu_a_rew=0.5, mu_a_pun=0.5, mu_K=2.5, mu_theta=2.5, mu_omega_f=0, mu_omega_p=0,
-                        sigma_a_rew=0.5, sigma_a_pun=0.5, sigma_K=1, sigma_theta=1, sigma_omega_f=1, sigma_omega_p=1)
+    subject = generate_subject_data(100, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_data" /  "simulated_single_subject_data.json")
     
     # simulate group data
-    '''
-    data = generate_group_data(
-                                payoff_structure, n_iterations=5, n_subs=48, 
+    group = generate_group_data(
+                                payoff_structure, n_iterations=20, n_subs=48, 
                                 fixed_theta=None, 
-                                save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_group_data.json")
+                                save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_group_data.json")    
     
-
 if __name__ == "__main__":
     main()
