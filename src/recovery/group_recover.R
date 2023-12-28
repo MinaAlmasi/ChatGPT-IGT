@@ -11,7 +11,8 @@ data <- jsonlite::fromJSON(file)
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
 # define iterations
-n_iterations <- 5
+n_iterations <- 20
+
 ## DEFINE PARAMS ## 
 # mu
 true_mu_a_rew <- array(NA,c(n_iterations))
@@ -43,8 +44,6 @@ infer_lambda_theta <- array(NA,c(n_iterations))
 infer_lambda_omega_f <- array(NA,c(n_iterations))
 infer_lambda_omega_p <- array(NA,c(n_iterations))
 
-class(data$mu_a_rew[1])
-
 start_time = Sys.time()
 for (i in 1:n_iterations) {
     start_iteration = Sys.time()
@@ -52,6 +51,9 @@ for (i in 1:n_iterations) {
     # get group choices and rewards
     x <- data$x[i][[1]]
     X <- data$X[i][[1]]
+
+    # nsubs
+    nsubs <- dim(x)[1]
 
     # change x from values 0, 1, 2, 3 to 1, 2, 3, 4
     x <- x + 1
@@ -72,10 +74,10 @@ for (i in 1:n_iterations) {
     sigma_omega_p <- as.numeric(data$sigma_omega_p[i])
 
 
-    ntrials_all <- rep(dim(x)[2], dim(x)[1]) # trials, subjects (defined by the dimensions of the choices)
+    ntrials <- rep(dim(x)[2], dim(x)[1]) # trials, subjects (defined by the dimensions of the choices)
     
     # setup jags
-    jags_data <- list("x", "X", "ntrials_all")
+    jags_data <- list("x", "X", "ntrials", "nsubs")
     params <- c("mu_a_rew", "mu_a_pun", "mu_K", "mu_theta", "mu_omega_f", "mu_omega_p",
                 "sigma_a_rew", "sigma_a_pun", "sigma_K", "sigma_theta", "sigma_omega_f", "sigma_omega_p")
     
@@ -83,7 +85,7 @@ for (i in 1:n_iterations) {
 
     samples <- jags.parallel(jags_data, inits = NULL, params,
                 model.file = model_file, n.chains = 3, 
-                n.iter = 3000, n.burnin = 10, n.thin = 1, n.cluster = 3)
+                n.iter = 100, n.burnin = 10, n.thin = 1, n.cluster = 3)
 
     print(samples$BUGSoutput)
 
@@ -124,7 +126,7 @@ for (i in 1:n_iterations) {
     df = data.frame(i, true_mu_a_rew[i], true_mu_a_pun[i], true_mu_K[i], true_mu_theta[i], true_mu_omega_f[i], true_mu_omega_p[i],
                     infer_mu_a_rew[i], infer_mu_a_pun[i], infer_mu_K[i], infer_mu_theta[i], infer_mu_omega_f[i], infer_mu_omega_p[i],
                     true_lambda_a_rew[i], true_lambda_a_pun[i], true_lambda_K[i], true_lambda_theta[i], true_lambda_omega_f[i], true_lambda_omega_p[i],
-                    infer_lambda_a_rew[i], infer_lambda_a_pun[i], infer_lambda_K[i], infer_lambda_theta[i], infer_lambda_omega_f[i], infer_lambda_omega_p[i]))
+                    infer_lambda_a_rew[i], infer_lambda_a_pun[i], infer_lambda_K[i], infer_lambda_theta[i], infer_lambda_omega_f[i], infer_lambda_omega_p[i])
 
     # save to csv
     filename = paste0("param_recovery_group_", i, ".csv")
