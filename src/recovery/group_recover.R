@@ -12,42 +12,45 @@ data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
-# define iterations
-n_iterations <- 20
+# define n groups (iterations to run)
+n_groups <- 30
+
+# subset data to n_groups (n groups)
+data <- lapply(data, function(x) x[1:n_groups])
 
 ## DEFINE PARAMS ## 
 # mu
-true_mu_a_rew <- array(NA,c(n_iterations))
-true_mu_a_pun <- array(NA,c(n_iterations))
-true_mu_K <- array(NA,c(n_iterations))
-true_mu_theta <- array(NA,c(n_iterations))
-true_mu_omega_f <- array(NA,c(n_iterations))
-true_mu_omega_p <- array(NA,c(n_iterations))
+true_mu_a_rew <- array(NA,c(n_groups))
+true_mu_a_pun <- array(NA,c(n_groups))
+true_mu_K <- array(NA,c(n_groups))
+true_mu_theta <- array(NA,c(n_groups))
+true_mu_omega_f <- array(NA,c(n_groups))
+true_mu_omega_p <- array(NA,c(n_groups))
 
-infer_mu_a_rew <- array(NA,c(n_iterations))
-infer_mu_a_pun <- array(NA,c(n_iterations))
-infer_mu_K <- array(NA,c(n_iterations))
-infer_mu_theta <- array(NA,c(n_iterations))
-infer_mu_omega_f <- array(NA,c(n_iterations))
-infer_mu_omega_p <- array(NA,c(n_iterations))
+infer_mu_a_rew <- array(NA,c(n_groups))
+infer_mu_a_pun <- array(NA,c(n_groups))
+infer_mu_K <- array(NA,c(n_groups))
+infer_mu_theta <- array(NA,c(n_groups))
+infer_mu_omega_f <- array(NA,c(n_groups))
+infer_mu_omega_p <- array(NA,c(n_groups))
 
 # sigma (SD for R) / lambda (precision for JAGS)
-true_lambda_a_rew <- array(NA,c(n_iterations))
-true_lambda_a_pun <- array(NA,c(n_iterations))
-true_lambda_K <- array(NA,c(n_iterations))
-true_lambda_theta <- array(NA,c(n_iterations))
-true_lambda_omega_f <- array(NA,c(n_iterations))
-true_lambda_omega_p <- array(NA,c(n_iterations))
+true_lambda_a_rew <- array(NA,c(n_groups))
+true_lambda_a_pun <- array(NA,c(n_groups))
+true_lambda_K <- array(NA,c(n_groups))
+true_lambda_theta <- array(NA,c(n_groups))
+true_lambda_omega_f <- array(NA,c(n_groups))
+true_lambda_omega_p <- array(NA,c(n_groups))
 
-infer_lambda_a_rew <- array(NA,c(n_iterations))
-infer_lambda_a_pun <- array(NA,c(n_iterations))
-infer_lambda_K <- array(NA,c(n_iterations))
-infer_lambda_theta <- array(NA,c(n_iterations))
-infer_lambda_omega_f <- array(NA,c(n_iterations))
-infer_lambda_omega_p <- array(NA,c(n_iterations))
+infer_lambda_a_rew <- array(NA,c(n_groups))
+infer_lambda_a_pun <- array(NA,c(n_groups))
+infer_lambda_K <- array(NA,c(n_groups))
+infer_lambda_theta <- array(NA,c(n_groups))
+infer_lambda_omega_f <- array(NA,c(n_groups))
+infer_lambda_omega_p <- array(NA,c(n_groups))
 
 start_time = Sys.time()
-for (i in 1:n_iterations) {
+for (i in 1:n_groups) {
     start_iteration = Sys.time()
 
     # get group choices and rewards
@@ -108,13 +111,13 @@ for (i in 1:n_iterations) {
     infer_mu_omega_f[i] <- MPD(Y$mu_omega_f)
     infer_mu_omega_p[i] <- MPD(Y$mu_omega_p)
     
-    # lambda
-    true_lambda_a_rew[i] <- sigma_a_rew
-    true_lambda_a_pun[i] <- sigma_a_pun
-    true_lambda_K[i] <- sigma_K
-    true_lambda_theta[i] <- sigma_theta
-    true_lambda_omega_f[i] <- sigma_omega_f
-    true_lambda_omega_p[i] <- sigma_omega_p
+    # lambda (converting sigma)
+    true_lambda_a_rew[i] <- 1/sigma_a_rew
+    true_lambda_a_pun[i] <- 1/sigma_a_pun
+    true_lambda_K[i] <- 1/sigma_K
+    true_lambda_theta[i] <- 1/sigma_theta
+    true_lambda_omega_f[i] <- 1/sigma_omega_f
+    true_lambda_omega_p[i] <- 1/sigma_omega_p
     
     # find maximum a posteriori
     infer_lambda_a_rew[i] <- MPD(Y$lambda_a_rew)
@@ -140,7 +143,7 @@ for (i in 1:n_iterations) {
     print(paste0(i, " Iteration time: ", run_iteration, " secs"))
 }   
 
-# save to df with n_iterations rows and 12 columns (6 true, 6 infer)
+# save to df with n_groups rows and 12 columns (6 true, 6 infer)
 df <- data.frame(true_mu_a_rew, true_mu_a_pun, true_mu_K, true_mu_theta, true_mu_omega_f, true_mu_omega_p, infer_mu_a_rew, infer_mu_a_pun, infer_mu_K, infer_mu_theta, infer_mu_omega_f, infer_mu_omega_p,
                  true_lambda_a_rew, true_lambda_a_pun, true_lambda_K, true_lambda_theta, true_lambda_omega_f, true_lambda_omega_p, infer_lambda_a_rew, infer_lambda_a_pun, infer_lambda_K, infer_lambda_theta, infer_lambda_omega_f, infer_lambda_omega_p)
 
