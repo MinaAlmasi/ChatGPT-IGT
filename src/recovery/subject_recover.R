@@ -13,6 +13,7 @@ data <- jsonlite::fromJSON(file)
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
 n_iterations <- 100
+ntrials <- 100
 
 true_a_rew <- array(NA,c(n_iterations))
 true_a_pun <- array(NA,c(n_iterations))
@@ -49,11 +50,9 @@ for (i in 1:n_iterations) {
     # change x from values 0, 1, 2, 3 to 1, 2, 3, 4
     x <- x + 1
 
-    ntrials <- 100
-
     # setup jags 
     jags_data <- list("x", "X", "ntrials")
-    params <- c("a_rew", "a_pun", "K", "theta", "omega_f", "omega_p")
+    params <- c("a_rew", "a_pun", "K", "theta", "omega_f", "omega_p", "p")
     model_file <- file.path(root_path, "ChatGPT-IGT", "models", "ORL.txt")
 
     samples <- jags.parallel(jags_data, inits = NULL, params,
@@ -85,15 +84,14 @@ for (i in 1:n_iterations) {
     # get probabilities for each response per trials and take max
     for (j in 1:ntrials) {
         p_predict <- c(
-            MPD(Y$prob_choice[j,1]),
-            MPD(Y$prob_choice[j,2]),
-            MPD(Y$prob_choice[j,3]),
-            MPD(Y$prob_choice[j,4])
+            MPD(Y$p[,j,1]),
+            MPD(Y$p[,j,2]),
+            MPD(Y$p[,j,3]),
+            MPD(Y$p[,j,4])
         )
-
         x_pred_subj[j] <- which.max(p_predict)
     }
-    
+
     # assign to general array
     x_pred[i,] <- x_pred_subj
 
