@@ -29,7 +29,7 @@ model {
   alpha_theta ~ dnorm(0,1)
   mu_theta ~ dnorm(0,1)
   lambda_theta_grp1 ~ dgamma(0,1)
-  lambda_theta_grp1 ~ dgamma(0,1)
+  lambda_theta_grp2 ~ dgamma(0,1)
 
 
   #----------- Group 1 model -------------------------------------------
@@ -38,7 +38,7 @@ model {
     a_rew_grp1[s] ~ dnorm((mu_a_rew - (alpha_a_rew/2)),lambda_a_rew_grp1)T(0,1)
     a_pun_grp1[s] ~ dnorm((mu_a_pun - (alpha_a_pun/2)),lambda_a_pun_grp1)T(0,1)
     K_grp1[s]  ~ dnorm((mu_K - (alpha_K/2)),lambda_K_grp1)T(0,)
-    theta_grp1[s] ~ dnorm((mu_theta - (alpha_theta/2)), lambda_theta_grp1)T(0,)
+    theta_grp1[s]  ~ dnorm((mu_theta - (alpha_theta/2)),lambda_theta_grp1)T(0,)
     omega_f_grp1[s] ~ dnorm((mu_omega_f - (alpha_omega_f/2)),lambda_omega_f_grp1)
     omega_p_grp1[s] ~ dnorm((mu_omega_p - (alpha_omega_p/2)),lambda_omega_p_grp1)
   
