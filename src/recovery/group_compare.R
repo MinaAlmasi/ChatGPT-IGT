@@ -33,12 +33,14 @@ true_alpha_a_pun <- array(NA,c(n_comparisons))
 true_alpha_K <- array(NA,c(n_comparisons))
 true_alpha_theta <- array(NA,c(n_comparisons))
 true_alpha_omega_f <- array(NA,c(n_comparisons))
+true_alpha_omega_p <- array(NA,c(n_comparisons))
 
 infer_alpha_a_rew <- array(NA,c(n_comparisons))
 infer_alpha_a_pun <- array(NA,c(n_comparisons))
 infer_alpha_K <- array(NA,c(n_comparisons))
 infer_alpha_theta <- array(NA,c(n_comparisons))
 infer_alpha_omega_f <- array(NA,c(n_comparisons))
+infer_alpha_omega_p <- array(NA,c(n_comparisons))
 
 start_time = Sys.time()
 for (i in 1:length(sampled_combinations)) {
@@ -87,12 +89,13 @@ for (i in 1:length(sampled_combinations)) {
     true_alpha_omega_p[i] <- as.numeric(grp2_data$mu_omega_p[[1]] - grp1_data$mu_omega_p[[1]])
     
     # extract samples to inferred
-    infer_alpha_a_rew[i] <- MPD(samples$alpha_a_rew)
-    infer_alpha_a_pun[i] <- MPD(samples$alpha_a_pun)
-    infer_alpha_K[i] <- MPD(samples$alpha_K)
-    infer_alpha_theta[i] <- MPD(samples$alpha_theta)
-    infer_alpha_omega_f[i] <- MPD(samples$alpha_omega_f)
-    infer_alpha_omega_p[i] <- MPD(samples$alpha_omega_p)
+    Y <- samples$BUGSoutput$sims.list
+    infer_alpha_a_rew[i] <- MPD(Y$alpha_a_rew)
+    infer_alpha_a_pun[i] <- MPD(Y$alpha_a_pun)
+    infer_alpha_K[i] <- MPD(Y$alpha_K)
+    infer_alpha_theta[i] <- MPD(Y$alpha_theta)
+    infer_alpha_omega_f[i] <- MPD(Y$alpha_omega_f)
+    infer_alpha_omega_p[i] <- MPD(Y$alpha_omega_p)
 
     # time 
     end_iteration <- Sys.time()
