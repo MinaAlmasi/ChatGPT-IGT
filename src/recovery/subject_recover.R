@@ -5,7 +5,8 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 set.seed(2502)
 
 # read json
-file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_single_subject_data.json")
+root_path <- "~/Desktop" # root_path = "work"
+file <- file.path(root_path, "dm-code", "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_single_subject_data.json")
 data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
@@ -50,7 +51,7 @@ for (i in 1:n_iterations) {
     # setup jags 
     jags_data <- list("x", "X", "ntrials")
     params <- c("a_rew", "a_pun", "K", "theta", "omega_f", "omega_p")
-    model_file <- file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "models", "ORL.txt")
+    model_file <- file.path(root_path, "dm-code", "ChatGPT-IGT", "models", "ORL.txt")
 
     samples <- jags.parallel(jags_data, inits = NULL, params,
                 model.file = model_file, n.chains = 3, 
@@ -97,4 +98,4 @@ plot(true_omega_p,infer_omega_p)
 df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p)
 
 # save to csv
-write.csv(df, file.path("~", "Desktop", "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_single_subject.csv"), row.names=FALSE)
+write.csv(df, file.path(root_path, "dm-code", "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_single_subject.csv"), row.names=FALSE)
