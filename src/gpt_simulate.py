@@ -351,7 +351,7 @@ def main():
         print()
 
     # save data
-    data_path = path / "data" / "GPTdata"
+    data_path = path / "data" / "raw_data" / "GPTdata"
     save_data(data, updated_messages, data_path=data_path, other=args.other_letters)
 
 if __name__ == '__main__':
