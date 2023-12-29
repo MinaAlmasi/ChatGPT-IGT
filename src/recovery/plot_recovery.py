@@ -18,22 +18,27 @@ def plot_parameter(ax, df, true_col, infer_col, title, col="#343795"):
     m, b = np.polyfit(df[true_col], df[infer_col], 1)
     ax.plot(df[true_col], m*df[true_col] + b, c=col)  # Add regression line
 
-def plot_recovery(df, subplot_dims=(3, 2), save_path=None):
+def plot_recovery(df, parameters, subplot_dims=(3, 2), save_path=None):
     '''
     Plot the recovery of parameters.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe containing the recovered parameters.
+    
+    subplot_dims : tuple
+        Dimensions of the subplot grid.
+    
+    parameters : list
+        List of tuples containing the column names of the (1) true and (2) inferred parameters and the (3) title of the subplot.
+    
+    save_path : str
+        Path to save the plot.
     '''
     fig, axs = plt.subplots(subplot_dims[0], subplot_dims[1], figsize=(10, 10))
 
     plt.subplots_adjust(hspace=0.5)
-
-    parameters = [
-        ("true_a_rew", "infer_a_rew", "$A_{rew}$"),
-        ("true_a_pun", "infer_a_pun", "$A_{pun}$"),
-        ("true_omega_f", "infer_omega_f", "$\omega_F$"),
-        ("true_omega_p", "infer_omega_p", "$\omega_P$"),
-        ("true_theta", "infer_theta", "$\\theta$"),
-        ("true_K", "infer_K", "$K$")
-    ]
 
     for i, (true_col, infer_col, title) in enumerate(parameters):
         ax = axs[i // subplot_dims[1], i % subplot_dims[1]]
@@ -45,12 +50,21 @@ def plot_recovery(df, subplot_dims=(3, 2), save_path=None):
 def main(): 
     # define paths
     path = pathlib.Path(__file__)
-    single_subj_path = path.parents[2] / "src" / "recovery" / "param_recovery_single_subject.csv"
+    single_subj_path = path.parents[2] / "src" / "recovery" / "recovered_parameters" / "param_recovery_single_subject.csv"
 
     # load simulated data (single subject)
     data = pd.read_csv(single_subj_path)
 
-    plot_recovery(data, save_path = path.parents[2] / "src" / "recovery" / "param_recovery_single_subject.png")
+    subject_parameters = [
+        ("true_a_rew", "infer_a_rew", "$A_{rew}$"),
+        ("true_a_pun", "infer_a_pun", "$A_{pun}$"),
+        ("true_omega_f", "infer_omega_f", "$\omega_F$"),
+        ("true_omega_p", "infer_omega_p", "$\omega_P$"),
+        ("true_theta", "infer_theta", "$\\theta$"),
+        ("true_K", "infer_K", "$K$")
+    ]
+
+    plot_recovery(data, parameters = subject_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject.png")
 
     print(data)
 
