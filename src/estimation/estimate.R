@@ -51,14 +51,15 @@ model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL.txt")
 start_time = Sys.time()
 
 # run jags model
+print("Intializing JAGS ...")
 #samples <- jags.parallel(jags_data, inits=NULL, params,
                          #model.file = model_file,
                          #n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
 
-print("Intializing JAGS ...")
+## TEMP CHUNK ## 
 samples <- jags.parallel(jags_data, inits=NULL, params,
                          model.file = model_file,
-                         n.chains=3, n.iter=100, n.burnin=10, n.thin=1, n.cluster=4)
+                         n.chains=1, n.iter=100, n.burnin=10, n.thin=1, n.cluster=4)
 # print time run
 end_time = Sys.time()
 print(end_time - start_time)
