@@ -28,7 +28,7 @@ ntrials <- array(0,c(nsubs))
 for (s in 1:nsubs) {
   
   #record n trials for subject s
-  ntrials_all[s] <- length(x_raw[data$subIDs==subIDs[s]])
+  ntrials_all[s] <- length(x_raw[data$subjID==subIDs[s]])
   
   # extract x and X for subject s
   X_sub <- X_raw[data$subjID==subIDs[s]] 
