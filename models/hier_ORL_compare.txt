@@ -17,12 +17,12 @@ model {
   lambda_K_grp2 ~ dgamma(.1,.1) 
   
   alpha_omega_f ~  dnorm(0,1)
-  mu_omega_f ~ dnorm(0,.1)
+  mu_omega_f ~ dnorm(0,1)
   lambda_omega_f_grp1 ~ dgamma(.1,.1) 
   lambda_omega_f_grp2 ~ dgamma(.1,.1) 
   
   alpha_omega_p ~  dnorm(0,1)
-  mu_omega_p ~ dnorm(0,.1)
+  mu_omega_p ~ dnorm(0,1)
   lambda_omega_p_grp1 ~ dgamma(.1,.1) 
   lambda_omega_p_grp2 ~ dgamma(.1,.1) 
 

@@ -7,12 +7,12 @@ model {
   mu_omega_f ~ dnorm(0,.1)
   mu_omega_p ~ dnorm(0,.1)
 
-  lambda_a_rew ~ dgamma(.1,.1)
-  lambda_a_pun ~ dgamma(.1,.1)
-  lambda_K ~ dgamma(.1,.1)
-  lambda_theta ~ dgamma(.1,.1)
-  lambda_omega_f ~ dgamma(.1,.1)
-  lambda_omega_p ~ dgamma(.1,.1)
+  lambda_a_rew ~ dgamma(.01,.01)
+  lambda_a_pun ~ dgamma(.01,.01)
+  lambda_K ~ dgamma(.01,.01)
+  lambda_theta ~ dgamma(.01,.01)
+  lambda_omega_f ~ dgamma(.01,.01)
+  lambda_omega_p ~ dgamma(.01,.01)
   
   # more informed priors (that hopefully fit the SD used in the simulation a bit better)
   #lambda_a_rew ~ dgamma(2.5/2,.01/2)
