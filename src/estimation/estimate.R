@@ -7,7 +7,8 @@ set.seed(2502)
 # read data
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
-file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", "clean_ahn_hc.csv")
+group_name = "gpt"
+file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", paste0("clean_", group_name, ".csv"))
 data <- read.csv(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
@@ -71,8 +72,8 @@ mu_omega_p <- Y$mu_omega_p
 df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
 
 # save df
-file <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "estimated_parameters", "param_estimated_ahn_hc.csv")
-write.csv(df, file)
+savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "estimated_parameters", paste0("param_estimated_", group_name, ".csv"))
+write.csv(df, savefile)
 
 # print time run
 end_time = Sys.time()
