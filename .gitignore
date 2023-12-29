@@ -163,9 +163,11 @@ cython_debug/
 .DS_Store
 
 #ign. data for now
-data/*
+data/raw_data/*
+data/final_data/clean_ahn.csv
 !data/README.md
-!data/GPTdata
+!data/raw_data/GPTdata
+
 
 # ign keys 
 keys/*
