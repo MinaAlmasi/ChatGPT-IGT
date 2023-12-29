@@ -22,7 +22,7 @@ X_raw <- data$X
 ntrials_max <- 100
 x <- array(0,c(nsubs,ntrials_max))
 X <- array(0,c(nsubs,ntrials_max))
-ntrials <- array(100,c(nsubs))
+ntrials <- array(0,c(nsubs))
 
 # turn data from long format into arrays with (nsubs x ntrials_max) dimensions
 for (s in 1:nsubs) {
@@ -52,14 +52,11 @@ start_time = Sys.time()
 
 # run jags model
 print("Intializing JAGS ...")
-#samples <- jags.parallel(jags_data, inits=NULL, params,
-                         #model.file = model_file,
-                         #n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
-
-## TEMP CHUNK ## 
 samples <- jags.parallel(jags_data, inits=NULL, params,
                          model.file = model_file,
-                         n.chains=1, n.iter=100, n.burnin=10, n.thin=1, n.cluster=4)
+                         n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
+
+
 # print time run
 end_time = Sys.time()
 print(end_time - start_time)
