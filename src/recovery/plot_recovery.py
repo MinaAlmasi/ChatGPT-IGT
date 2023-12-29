@@ -5,6 +5,14 @@ import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import re
+from scipy.stats import binom
+
+def chance_level(n, alpha = 0.001, p = 0.5):
+    k = binom.ppf(1-alpha, n, p)
+    chance_level = k/n
+    
+    return chance_level
 
 def plot_parameter(ax, df, true_col, infer_col, title, col="#343795"):
     """
@@ -47,6 +55,73 @@ def plot_recovery(df, parameters, subplot_dims=(3, 2), save_path=None):
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
 
+def preprocess_descriptive_adaquacy(true_parameter_data, subject_data):
+    # fix formatting of true_parameter_data to fit with subject_data
+    expanded_true_parameter_data = pd.concat([pd.DataFrame(row.x).T for index, row in true_parameter_data.iterrows()], ignore_index=True)
+    expanded_true_parameter_data.columns = [f'X{i+1}' for i in range(expanded_true_parameter_data.shape[1])]
+    true_parameter_data = pd.concat([true_parameter_data.reset_index(drop=True), expanded_true_parameter_data], axis=1)
+
+    # Assuming df1 and df2 are your two DataFrames
+    accuracies = []
+
+    # Filter columns that start with 'X' followed by a number
+    x_columns = [col for col in true_parameter_data.columns if re.match(r'X\d+', col)]
+
+    # Iterate over each row
+    for i in range(len(true_parameter_data)):
+        # Select only the relevant 'X' columns for the current row in both DataFrames
+        row_df1 = true_parameter_data[x_columns].iloc[i]
+        row_df2 = subject_data[x_columns].iloc[i]
+
+        # plus one to all in row_df1 to account for the fact that the parameters are not 1-4 but 0-3
+        row_df1 = row_df1 + 1
+
+        # Count the number of relevant 'X' columns with the same value
+        same_count = sum(row_df1 == row_df2)
+
+        # Calculate accuracy
+        accuracy = same_count / len(x_columns) * 100
+        accuracies.append(accuracy)
+
+    # Add the accuracy list as a new column to one of the DataFrames
+    true_parameter_data['Accuracy'] = accuracies
+
+    return true_parameter_data
+
+def plot_descriptive_adequacy(df, save_path=None):
+    '''
+    Plot the descriptive adequacy of the model.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe containing the accuracies in choice estimations for each subject
+    
+    save_path : str
+        Path to save the plot.
+    '''
+    # Set subplot
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Create bar plot with each subject (row) on the x-axis and the accuracy on the y-axis
+    ax.bar(df.index, df['Accuracy'])
+
+    # add a line for 
+
+
+    # Set x-ticks at regular intervals (e.g., every 10 subjects)
+    tick_interval = 10
+    ax.set_xticks(df.index[::tick_interval])  # Only label every nth subject
+    ax.set_xticklabels([i+1 for i in df.index[::tick_interval]])  # Adjust labels to match
+    ax.set_xlabel("Subject")
+    ax.set_ylabel("Accuracy in Choice Estimation")
+
+    # Save the plot if a save path is provided
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+    
+
+
 def main(): 
     # define paths
     path = pathlib.Path(__file__)
@@ -82,6 +157,13 @@ def main():
     ]
 
     plot_recovery(group_data, parameters = group_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group.png")
+
+    # load actual parameters
+    true_parameter_data = pd.read_json(path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data.json") 
+
+    # run descriptive adequacy
+    desc_ada_data = preprocess_descriptive_adaquacy(true_parameter_data, subject_data)
+    plot_descriptive_adequacy(desc_ada_data, save_path = path.parents[2] / "src" / "recovery" / "plots" / "descriptive_adequacy.png")
 
 
 if __name__ == "__main__":
