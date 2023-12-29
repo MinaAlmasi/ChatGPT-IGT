@@ -164,7 +164,7 @@ cython_debug/
 
 #ign. data for now
 data/raw_data/*
-data/final_data/clean_ahn.csv
+data/final_data/clean_ahn_hc.csv
 !data/README.md
 !data/raw_data/GPTdata
 
