@@ -56,6 +56,7 @@ def plot_recovery(df, parameters, subplot_dims=(3, 2), save_path=None):
         plt.savefig(save_path, dpi=300)
 
 def preprocess_descriptive_adaquacy(true_parameter_data, subject_data):
+    
     # fix formatting of true_parameter_data to fit with subject_data
     expanded_true_parameter_data = pd.concat([pd.DataFrame(row.x).T for index, row in true_parameter_data.iterrows()], ignore_index=True)
     expanded_true_parameter_data.columns = [f'X{i+1}' for i in range(expanded_true_parameter_data.shape[1])]
