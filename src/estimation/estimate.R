@@ -19,9 +19,9 @@ x_raw <- data$x
 X_raw <- data$X
 
 # initialize empty arrays
+ntrials_max <- 100
 x <- array(0,c(nsubs,ntrials_max))
 X <- array(0,c(nsubs,ntrials_max))
-ntrials_max <- 100
 ntrials <- array(100,c(nsubs))
 
 # turn data from long format into arrays with (nsubs x ntrials_max) dimensions
