@@ -56,7 +56,7 @@ def plot_recovery(df, parameters, subplot_dims=(3, 2), save_path=None):
         plt.savefig(save_path, dpi=300)
 
 def preprocess_descriptive_adaquacy(true_parameter_data, subject_data):
-    
+
     # fix formatting of true_parameter_data to fit with subject_data
     expanded_true_parameter_data = pd.concat([pd.DataFrame(row.x).T for index, row in true_parameter_data.iterrows()], ignore_index=True)
     expanded_true_parameter_data.columns = [f'X{i+1}' for i in range(expanded_true_parameter_data.shape[1])]
@@ -113,12 +113,15 @@ def plot_descriptive_adequacy(df, save_path=None):
     # Add a dotted line for chance level at 25%, set to black
     ax.axhline(y=chance_level(n=100, p=0.25, alpha=0.05), linestyle='--', color='black')
 
+    # add legend for the two lines in the top right corner
+    ax.legend(['Average Accuracy', 'Chance Level'], loc='upper right')
+
     # Set x-ticks to start at 0 and then at every 10th subject
     ax.set_xticks(range(0, len(df.index), 10))
     ax.set_xticklabels(range(0, len(df.index), 10))
 
     ax.set_xlabel("Subject")
-    ax.set_ylabel("Accuracy in Choice Estimation")
+    ax.set_ylabel("Choice Estimation Accuracy")
 
     # Limit x-axis to just cover the range of subjects, eliminating extra space on sides
     ax.set_xlim(-0.5, len(df.index) - 0.5)
