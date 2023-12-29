@@ -1,10 +1,10 @@
 '''
-Check Steingrover data
+Prepare AHN data
 '''
 import pathlib
 import pandas as pd
 
-def prepare_ahn(data_path, filename:str="healthy_control"):
+def prepare_ahn(data_path, filename:str="healthy_control", save_path=None):
     '''
     Load and Prepare Ahn data 
     '''
@@ -21,7 +21,14 @@ def prepare_ahn(data_path, filename:str="healthy_control"):
     df['X'] = df['gain'] + df['loss']
 
     # drop gain and loss
-    df = df.drop(columns=['gain', 'loss'])
+    df = df.drop(columns=['gain', 'loss', 'trial'])
+
+    # rename columns
+    df = df.rename(columns={'deck':'x'})
+
+    # save data
+    if save_path is not None:
+        df.to_csv(save_path / f"clean_ahn_hc.csv", index=False)
 
     return df
 
@@ -50,7 +57,7 @@ def load_gpt(datapath):
 
     return df
 
-def clean_gpt(gpt_df):
+def clean_gpt(gpt_df, save_path=None):
     '''
     Cleans GPT data by translating decks, adding outcomes, dropping unnecessary columns and renaming columns
     '''
@@ -76,6 +83,9 @@ def clean_gpt(gpt_df):
     # rename columns
     gpt_df = gpt_df.rename(columns={'deck':'x'})
 
+    # save data
+    gpt_df.to_csv(save_path / f"clean_gpt.csv", index=False)
+
     return gpt_df
     
 
@@ -84,13 +94,13 @@ def main():
     path = pathlib.Path(__file__).parents[2]
 
     # path to data 
-    data_root = path / "data" 
+    data_root = path / "data" / "raw_data"
 
     # save path 
-    save_path = path / "data"
+    save_path = path / "data" / "final_data"
 
     # load ahn data
-    df_ahn = load_ahn(data_path = data_root / "Ahn2014", filename="healthy_control")
+    df_ahn = prepare_ahn(data_path = data_root / "Ahn2014", filename="healthy_control", save_path=save_path)
 
     print(df_ahn)
 
@@ -98,7 +108,7 @@ def main():
     df_gpt = load_gpt(data_root / "GPTdata")
 
     # translate gpt data
-    df_gpt = clean_gpt(df_gpt)
+    df_gpt = clean_gpt(df_gpt, save_path=save_path)
 
     print(df_gpt)
 
