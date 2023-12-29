@@ -51,10 +51,14 @@ def main():
     # define paths
     path = pathlib.Path(__file__)
     single_subj_path = path.parents[2] / "src" / "recovery" / "recovered_parameters" / "param_recovery_single_subject.csv"
+    group_path = path.parents[2] / "src" / "recovery" / "recovered_parameters" / "param_recovery_group_ALL.csv"
 
-    # load simulated data (single subject)
-    data = pd.read_csv(single_subj_path)
+    # load recovered parameters
+    subject_data = pd.read_csv(single_subj_path)
+    group_data = pd.read_csv(group_path)
+    
 
+    # set parameters for subject recovery
     subject_parameters = [
         ("true_a_rew", "infer_a_rew", "$A_{rew}$"),
         ("true_a_pun", "infer_a_pun", "$A_{pun}$"),
@@ -63,10 +67,22 @@ def main():
         ("true_theta", "infer_theta", "$\\theta$"),
         ("true_K", "infer_K", "$K$")
     ]
+    
+    # run subject recovery
+    plot_recovery(subject_data, parameters = subject_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject.png")
 
-    plot_recovery(data, parameters = subject_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject.png")
+    # set parameters for group recovery
+    group_parameters = [
+        ("true_mu_a_rew", "infer_mu_a_rew", "$\mu A_{rew}$"),
+        ("true_mu_a_pun", "infer_mu_a_pun", "$\mu A_{pun}$"),
+        ("true_mu_omega_f", "infer_mu_omega_f", "$\mu \omega_F$"),
+        ("true_mu_omega_p", "infer_mu_omega_p", "$\mu \omega_P$"),
+        ("true_mu_theta", "infer_mu_theta", "$\mu \\theta$"),
+        ("true_mu_K", "infer_mu_K", "$\mu K$")
+    ]
 
-    print(data)
+    plot_recovery(group_data, parameters = group_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group.png")
+
 
 if __name__ == "__main__":
     main()
