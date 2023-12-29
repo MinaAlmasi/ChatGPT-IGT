@@ -8,13 +8,13 @@ set.seed(2502)
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
 gpt_file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", "clean_gpt.csv")
-gpt_data <- read.csv(file)
+gpt_data <- read.csv(gpt_file)
 
 hc_file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", "clean_ahn_hc.csv")
-hc_data <- read.csv(file)
+hc_data <- read.csv(hc_file)
 
 # get vars
-source(file.path(root_path, "ChatGPT-IGT", "src", "comparison", "process_data.R"))
+source(file.path(root_path, "ChatGPT-IGT", "src", "data_util.R"))
 gpt_vars <- processData(gpt_data)
 hc_vars <- processData(hc_data)
 
@@ -29,12 +29,15 @@ X_grp2 <- gpt_vars$X
 ntrials <- gpt_vars$ntrials
 nsubs <- gpt_vars$nsubs
 
+# set timer
+start_time = Sys.time()
+
 # setup jags 
-print("Intializing JAGS ...")
 jags_data <- list("x_grp1", "X_grp1", "x_grp2", "X_grp2", "ntrials", "nsubs")
 params<-c("alpha_a_rew","alpha_a_pun","alpha_K","alpha_omega_f","alpha_omega_p", "alpha_theta")
 
 # run jags
+print("Intializing JAGS ...")
 model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL_compare.txt")
 samples <- jags.parallel(jags_data, inits=NULL, params,
                 model.file =model_file,
@@ -42,3 +45,22 @@ samples <- jags.parallel(jags_data, inits=NULL, params,
     
 print(samples$BUGSoutput)
 
+# extract alpha parameters
+Y <- samples$BUGSoutput$sims.list
+alpha_a_rew <- Y$alpha_a_rew
+alpha_a_pun <- Y$alpha_a_pun
+alpha_K <- Y$alpha_K
+alpha_theta <- Y$alpha_theta
+alpha_omega_f <- Y$alpha_omega_f
+alpha_omega_p <- Y$alpha_omega_p
+
+# time 
+end_iteration <- Sys.time()
+run_iteration <- round(end_iteration - start_iteration, 2)
+print(paste0(i, " Iteration time: ", run_iteration, " minutes"))
+
+# make dataframe
+df = data.frame(alpha_a_rew, alpha_a_pun, alpha_K, alpha_theta, alpha_omega_f, alpha_omega_p)
+
+# save df
+write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "alpha_params_comparison.csv"))
