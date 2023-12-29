@@ -80,7 +80,7 @@ def preprocess_descriptive_adaquacy(true_parameter_data, subject_data):
         same_count = sum(row_df1 == row_df2)
 
         # Calculate accuracy
-        accuracy = same_count / len(x_columns) * 100
+        accuracy = same_count / len(x_columns)
         accuracies.append(accuracy)
 
     # Add the accuracy list as a new column to one of the DataFrames
@@ -104,21 +104,29 @@ def plot_descriptive_adequacy(df, save_path=None):
     fig, ax = plt.subplots(figsize=(10, 10))
 
     # Create bar plot with each subject (row) on the x-axis and the accuracy on the y-axis
-    ax.bar(df.index, df['Accuracy'])
+    ax.bar(df.index, df['Accuracy'], color='darkgrey')  # Set bars to dark grey
 
-    # add a line for 
+    # Add a line for average accuracy across subjects, set to black
+    ax.axhline(y=df['Accuracy'].mean(), linestyle='-', color='black')
 
+    # Add a dotted line for chance level at 25%, set to black
+    ax.axhline(y=chance_level(n=100, p=0.25, alpha=0.05), linestyle='--', color='black')
 
-    # Set x-ticks at regular intervals (e.g., every 10 subjects)
-    tick_interval = 10
-    ax.set_xticks(df.index[::tick_interval])  # Only label every nth subject
-    ax.set_xticklabels([i+1 for i in df.index[::tick_interval]])  # Adjust labels to match
+    # Set x-ticks to start at 0 and then at every 10th subject
+    ax.set_xticks(range(0, len(df.index), 10))
+    ax.set_xticklabels(range(0, len(df.index), 10))
+
     ax.set_xlabel("Subject")
     ax.set_ylabel("Accuracy in Choice Estimation")
+
+    # Limit x-axis to just cover the range of subjects, eliminating extra space on sides
+    ax.set_xlim(-0.5, len(df.index) - 0.5)
 
     # Save the plot if a save path is provided
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
+
+    plt.show()  # Add this to display the plot when not saving
     
 
 
