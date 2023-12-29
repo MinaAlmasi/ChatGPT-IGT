@@ -79,6 +79,8 @@ for (i in 1:length(sampled_combinations)) {
     samples <- jags.parallel(jags_data, inits=NULL, params,
                 model.file =model_file,
                 n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
+    
+    print(samples$BUGSoutput)
 
     # true parameters
     true_alpha_a_rew[i] <- as.numeric(grp2_data$mu_a_rew[[1]] - grp1_data$mu_a_rew[[1]])
