@@ -102,16 +102,11 @@ def main():
     # load ahn data
     df_ahn = prepare_ahn(data_path = data_root / "Ahn2014", filename="healthy_control", save_path=save_path)
 
-    print(df_ahn)
-
     # load gpt data
     df_gpt = load_gpt(data_root / "GPTdata")
 
     # translate gpt data
     df_gpt = clean_gpt(df_gpt, save_path=save_path)
-
-    print(df_gpt)
-
 
 if __name__ == "__main__":
     main()
