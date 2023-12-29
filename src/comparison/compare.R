@@ -14,7 +14,7 @@ hc_file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", "clean_ahn_
 hc_data <- read.csv(file)
 
 # get vars
-source(file.path(root_path, "ChatGPT-IGT", "src", "comparison", "prepare_data.R"))
+source(file.path(root_path, "ChatGPT-IGT", "src", "comparison", "process_data.R"))
 gpt_vars <- processData(gpt_data)
 hc_vars <- processData(hc_data)
 
