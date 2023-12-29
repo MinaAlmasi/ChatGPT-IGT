@@ -56,12 +56,26 @@ samples <- jags.parallel(jags_data, inits=NULL, params,
                          model.file = model_file,
                          n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
 
+print(samples$BUGSoutput)
+
+# extact mu parameters
+Y <- samples$BUGSoutput$sims.list
+mu_a_rew <- Y$mu_a_rew
+mu_a_pun <- Y$mu_a_pun
+mu_K <- Y$mu_K
+mu_theta <- Y$mu_theta
+mu_omega_f <- Y$mu_omega_f
+mu_omega_p <- Y$mu_omega_p
+
+# save to df 
+df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
+
+# save df
+file <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "estimated_parameters", "param_estimated_ahn_hc.csv")
+write.csv(df, file)
 
 # print time run
 end_time = Sys.time()
 print(end_time - start_time)
-
-print(samples$BUGSoutput)
-print(samples$BUGSoutput$sims.list$mu_a_rew)
 
 
