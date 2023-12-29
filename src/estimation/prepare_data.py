@@ -20,6 +20,15 @@ def prepare_ahn(data_path, filename:str="healthy_control", save_path=None):
     # create outcoome column (note the sign: plus because losses are stored as negative)
     df['X'] = df['gain'] + df['loss']
 
+    # group by subject id to see how many observatiions each subject has
+    count = df.groupby('subjID').count()
+
+    # get the last 30 subject ids in count
+    last_30 = count.index[-30:]
+
+    # filter df to only include last 30 subjects
+    df = df[df['subjID'].isin(last_30)].reset_index(drop=True)
+
     # drop gain and loss
     df = df.drop(columns=['gain', 'loss', 'trial'])
 
