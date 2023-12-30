@@ -21,8 +21,8 @@ def plot_posteriors(hc_data, gpt_data, parameters=[("mu_a_rew", "$\mu A_{rew}$")
             "mu_a_pun": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
             "mu_K": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
             "mu_theta": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
-            "mu_omega_f": lambda size: np.random.normal(0, 0.1, size),
-            "mu_omega_p": lambda size: np.random.normal(0, 0.1, size),
+            "mu_omega_f": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size),
+            "mu_omega_p": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size),
             # Add other priors if necessary
         }
 
@@ -61,7 +61,8 @@ def main():
     gpt_data = pd.read_csv(data_path / "param_estimated_gpt.csv")
 
     # plot posteriors
-    plot_posteriors(hc_data, gpt_data, save_path=path.parents[2] / "src" / "estimation" / "plots", show_priors=True)
+    plot_posteriors(hc_data, gpt_data, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_w_priors", show_priors=True)
+    plot_posteriors(hc_data, gpt_data, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_no_priors", show_priors=False)
 
 if __name__ == "__main__":
     main()
