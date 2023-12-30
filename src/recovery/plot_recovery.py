@@ -39,13 +39,23 @@ def plot_recovery(df, parameters:list, subplot_dims:tuple=(3, 2), save_path=None
     Returns
         plt
     '''
+
+    # define subplot
     fig, axs = plt.subplots(subplot_dims[0], subplot_dims[1], figsize=(10, 10))
 
+    # adjust spacing
     plt.subplots_adjust(hspace=0.5)
 
+    # plot each parameter
     for i, (true_col, infer_col, title) in enumerate(parameters):
         ax = axs[i // subplot_dims[1], i % subplot_dims[1]]
         plot_parameter(ax, df, true_col, infer_col, title)
+
+    # check if there are any empty subplots
+    if subplot_dims[0] * subplot_dims[1] > len(parameters):
+        for i in range(len(parameters), subplot_dims[0] * subplot_dims[1]):
+            ax = axs[i // subplot_dims[1], i % subplot_dims[1]]
+            ax.axis('off')
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
@@ -133,15 +143,17 @@ def main():
     # define paths
     path = pathlib.Path(__file__)
     single_subj_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_single_subject.csv"
+    single_subj_fixed_theta_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_single_subject_fixed_theta.csv"
     group_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL.csv"
     comparison_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_comparisons.csv"
 
     # load recovered parameters
     subject_data = pd.read_csv(single_subj_path)
+    subject_data_fixed_theta = pd.read_csv(single_subj_fixed_theta_path)
     group_data = pd.read_csv(group_path)
     comparison_data = pd.read_csv(comparison_path)
 
-    # set parameters for subject recovery
+    # plot subject recovery
     subject_parameters = [
         ("true_a_rew", "infer_a_rew", "$A_{rew}$"),
         ("true_a_pun", "infer_a_pun", "$A_{pun}$"),
@@ -151,10 +163,13 @@ def main():
         ("true_K", "infer_K", "$K$")
     ]
     
-    # run subject recovery
     plot_recovery(subject_data, parameters = subject_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject.png")
 
-    # set parameters for group recovery
+    # plot subject recovery but for recovered parameters without theta
+    subject_parameters_no_theta = [x for x in subject_parameters if x[0] != "true_theta"]
+    plot_recovery(subject_data_fixed_theta, parameters = subject_parameters_no_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject_no_theta.png")
+
+    # plot parameters for group recovery
     group_parameters = [
         ("true_mu_a_rew", "infer_mu_a_rew", "$\mu A_{rew}$"),
         ("true_mu_a_pun", "infer_mu_a_pun", "$\mu A_{pun}$"),
