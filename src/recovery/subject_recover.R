@@ -5,7 +5,7 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 set.seed(2502)
 
 # define whether theta is fixed or not
-fixed_theta <- TRUE
+fixed_theta <- FALSE
 
 # define root path depending on whether it is run locally or on Ucloud
 root_path <- "~/Desktop/dm-code" # personal comp
