@@ -14,7 +14,7 @@ hc_file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", "clean_ahn_
 hc_data <- read.csv(hc_file)
 
 # get vars
-source(file.path(root_path, "ChatGPT-IGT", "src", "data_util.R"))
+source(file.path(root_path, "ChatGPT-IGT", "src", "data_util.R")) # function processData() already scales payoffs for both groups
 gpt_vars <- processData(gpt_data)
 hc_vars <- processData(hc_data)
 
