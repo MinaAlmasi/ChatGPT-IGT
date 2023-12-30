@@ -46,7 +46,7 @@ samples <- jags.parallel(jags_data, inits=NULL, params,
 print(samples$BUGSoutput)
 
 # save bugs output to txt
-write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "outcome_summary_comparison.txt"))
+write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "outcome_comparison_summary.txt"))
 
 # extract params
 Y <- samples$BUGSoutput$sims.list
