@@ -15,9 +15,9 @@ def chance_level(n, alpha = 0.001, p = 0.5):
     return chance_level
 
 def plot_parameter(ax, df, true_col, infer_col, title, col="#7C7D7C"):
-    """
+    '''
     Helper function to plot parameter recovery.
-    """
+    '''
     ax.scatter(df[true_col], df[infer_col], c=col)
     ax.set_title(title)
     ax.set_xlabel("True Value")
@@ -26,23 +26,18 @@ def plot_parameter(ax, df, true_col, infer_col, title, col="#7C7D7C"):
     m, b = np.polyfit(df[true_col], df[infer_col], 1)
     ax.plot(df[true_col], m*df[true_col] + b, c=col)  # Add regression line
 
-def plot_recovery(df, parameters, subplot_dims=(3, 2), save_path=None):
+def plot_recovery(df, parameters:list, subplot_dims:tuple=(3, 2), save_path=None):
     '''
     Plot the recovery of parameters.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Dataframe containing the recovered parameters.
-    
-    subplot_dims : tuple
-        Dimensions of the subplot grid.
-    
-    parameters : list
-        List of tuples containing the column names of the (1) true and (2) inferred parameters and the (3) title of the subplot.
-    
-    save_path : str
-        Path to save the plot.
+    Args
+        df: Dataframe containing the recovered parameters.
+        subplot_dims: Dimensions of the subplot grid.
+        parameters: List of tuples containing the column names of the (1) true and (2) inferred parameters and the (3) title of the subplot.
+        save_path: Full path to save the plot (defaults to None, i.e., no saving)
+
+    Returns
+        plt
     '''
     fig, axs = plt.subplots(subplot_dims[0], subplot_dims[1], figsize=(10, 10))
 
@@ -55,36 +50,37 @@ def plot_recovery(df, parameters, subplot_dims=(3, 2), save_path=None):
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
 
-def preprocess_descriptive_adaquacy(true_parameter_data, subject_data):
+    return plt
 
+def preprocess_descriptive_adaquacy(true_parameter_data, subject_data):
     # fix formatting of true_parameter_data to fit with subject_data
     expanded_true_parameter_data = pd.concat([pd.DataFrame(row.x).T for index, row in true_parameter_data.iterrows()], ignore_index=True)
     expanded_true_parameter_data.columns = [f'X{i+1}' for i in range(expanded_true_parameter_data.shape[1])]
     true_parameter_data = pd.concat([true_parameter_data.reset_index(drop=True), expanded_true_parameter_data], axis=1)
 
-    # Assuming df1 and df2 are your two DataFrames
+    # assuming df1 and df2 are your two DataFrames
     accuracies = []
 
-    # Filter columns that start with 'X' followed by a number
+    # filter columns that start with 'X' followed by a number
     x_columns = [col for col in true_parameter_data.columns if re.match(r'X\d+', col)]
 
-    # Iterate over each row
+    # iterate over each row
     for i in range(len(true_parameter_data)):
-        # Select only the relevant 'X' columns for the current row in both DataFrames
+        # select only the relevant 'X' columns for the current row in both DataFrames
         row_df1 = true_parameter_data[x_columns].iloc[i]
         row_df2 = subject_data[x_columns].iloc[i]
 
         # plus one to all in row_df1 to account for the fact that the parameters are not 1-4 but 0-3
         row_df1 = row_df1 + 1
 
-        # Count the number of relevant 'X' columns with the same value
+        # count number of relevant 'X' columns with the same value
         same_count = sum(row_df1 == row_df2)
 
-        # Calculate accuracy
+        # compute accuracy
         accuracy = same_count / len(x_columns)
         accuracies.append(accuracy)
 
-    # Add the accuracy list as a new column to one of the DataFrames
+    # add the accuracy list as a new column to one of the DataFrames
     true_parameter_data['Accuracy'] = accuracies
 
     return true_parameter_data
@@ -128,10 +124,9 @@ def plot_descriptive_adequacy(df, save_path=None):
 
     # Save the plot if a save path is provided
     if save_path is not None:
-        plt.savefig(save_path, dpi=300)
+        plt.savefig(save_path, dpi=300)    
 
-    plt.show()  # Add this to display the plot when not saving
-    
+    return plt
 
 
 def main(): 
@@ -139,11 +134,12 @@ def main():
     path = pathlib.Path(__file__)
     single_subj_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_single_subject.csv"
     group_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL.csv"
+    comparison_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_comparisons.csv"
 
     # load recovered parameters
     subject_data = pd.read_csv(single_subj_path)
     group_data = pd.read_csv(group_path)
-    
+    comparison_data = pd.read_csv(comparison_path)
 
     # set parameters for subject recovery
     subject_parameters = [
@@ -169,6 +165,18 @@ def main():
     ]
 
     plot_recovery(group_data, parameters = group_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group.png")
+
+    # plot recovery for group comparisons
+    comparison_parameters = [
+        ("true_alpha_a_rew", "infer_alpha_a_rew", "$\\alpha A_{rew}$"),
+        ("true_alpha_a_pun", "infer_alpha_a_pun", "$\\alpha A_{pun}$"),
+        ("true_alpha_omega_f", "infer_alpha_omega_f", "$\\alpha \omega_F$"),
+        ("true_alpha_omega_p", "infer_alpha_omega_p", "$\\alpha \omega_P$"),
+        ("true_alpha_theta", "infer_alpha_theta", "$\\alpha \\theta$"),
+        ("true_alpha_K", "infer_alpha_K", "$\\alpha K$")
+    ]
+
+    plot_recovery(comparison_data, parameters = comparison_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group_comparison.png")
 
     # load actual parameters
     true_parameter_data = pd.read_json(path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data.json") 
