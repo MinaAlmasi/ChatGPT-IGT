@@ -3,7 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from scipy.stats import truncnorm, gamma
+from scipy.stats import truncnorm, gamma, binom
+
+def chance_level(n, alpha = 0.001, p = 0.5):
+    k = binom.ppf(1-alpha, n, p)
+    chance_level = k/n
+    
+    return chance_level
 
 def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
@@ -28,8 +34,8 @@ def plot_posteriors(hc_data, gpt_data, parameters=[("mu_a_rew", "$\mu A_{rew}$")
 
     for i, (param_name, param_title) in enumerate(parameters):
         ax = axs[i // 2, i % 2]
-        sns.kdeplot(hc_data[param_name], ax=ax, fill=True, alpha=0.5, label="HC")
-        sns.kdeplot(gpt_data[param_name], ax=ax, fill=True, alpha=0.5, label="GPT")
+        sns.kdeplot(hc_data[param_name], ax=ax, fill=True, alpha=0.5, label="HC", color="#23AB2D")
+        sns.kdeplot(gpt_data[param_name], ax=ax, fill=True, alpha=0.5, label="GPT", color="#5dc5e3")
 
         # Plot prior if show_priors is True
         if show_priors and priors:
@@ -44,28 +50,78 @@ def plot_posteriors(hc_data, gpt_data, parameters=[("mu_a_rew", "$\mu A_{rew}$")
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
 
-    plt.show()
+def plot_multiple_descriptive_adequacies(df, save_path=None):
+    '''
+    Plot the descriptive adequacy of the model.
 
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe containing the accuracies in choice estimations for each subject
+    
+    save_path : str
+        Path to save the plot.
+    '''
+    # divide pred success by 100 to get percentage
+    df['pred_success'] = df['pred_success'] / 100
 
+    # Set subplot
+    fig, ax = plt.subplots(figsize=(10, 10))
 
+    # sort bar chart by accuracy descending
+    df = df.sort_values(by=['pred_success'], ascending=False).reset_index(drop=True)
+
+    # Create bar plot with each subject (row) on the x-axis and the accuracy on the y-axis
+    ax.bar(df.index, df['pred_success'], color='darkgrey')  # Set bars to dark grey
+
+    # Add a line for average accuracy across subjects, set to black
+    ax.axhline(y=df['pred_success'].mean(), linestyle='-', color='black')
+
+    # Add a dotted line for chance level at 25%, set to black
+    ax.axhline(y=chance_level(n=60, p=0.25, alpha=0.05), linestyle='--', color='black')
+
+    # add legend for the two lines in the top right corner
+    ax.legend(['Average Accuracy', 'Chance Level'], loc='upper right')
+
+    # Set x-ticks to start at 0 and then at every 10th subject
+    ax.set_xticks(range(0, len(df.index), 10))
+    ax.set_xticklabels(range(0, len(df.index), 10))
+
+    ax.set_xlabel("Subject")
+    ax.set_ylabel("Choice Estimation Accuracy")
+
+    # Limit x-axis to just cover the range of subjects, eliminating extra space on sides
+    ax.set_xlim(-0.5, len(df.index) - 0.5)
+
+    # Save the plot if a save path is provided
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+
+    plt.show()  # Add this to display the plot when not saving
 
 
 
 def main(): 
     # define paths
     path = pathlib.Path(__file__)
-    data_path = path.parents[2] / "src" / "estimation" / "estimated_parameters"
+    data_path = path.parents[2] / "src" / "estimation" / "results"
     
-    # load data
-    hc_data = pd.read_csv(data_path / "param_estimated_ahn_hc.csv")
-    gpt_data = pd.read_csv(data_path / "param_estimated_gpt.csv")
+    # load parameter estimation data
+    hc_data_params = pd.read_csv(data_path / "param_estimated_ahn_hc.csv")
+    gpt_data_params = pd.read_csv(data_path / "param_estimated_gpt.csv")
 
     # plot posteriors
-    plot_posteriors(hc_data, gpt_data, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_w_priors", show_priors=True)
-    plot_posteriors(hc_data, gpt_data, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_no_priors", show_priors=False)
+    plot_posteriors(hc_data_params, gpt_data_params, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_w_priors", show_priors=True)
 
-    hc_new_priors_data = pd.read_csv(data_path / "NEW_PRIORS_param_estimated_ahn_hc.csv")
-    plot_posteriors(hc_new_priors_data, gpt_data, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_NEW_PRIORS", show_priors=True)
+    # load posterior predictions data
+    #hc_data_pred = pd.read_csv(data_path / "pred_success_ahn_hc.csv")
+    gpt_data_pred = pd.read_csv(data_path / "pred_success_gpt.csv")
+
+    # plot descriptive adequacy
+    #plot_multiple_descriptive_adequacies(hc_data_pred, save_path=path.parents[2] / "src" / "estimation" / "plots" / "descriptive_adequacy_hc")
+    plot_multiple_descriptive_adequacies(gpt_data_pred)
+
+
 
 if __name__ == "__main__":
     main()
