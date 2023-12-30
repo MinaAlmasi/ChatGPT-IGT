@@ -9,7 +9,7 @@ MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
-group_name = "gpt"
+group_name = "ahn_hc" # write either "ahn_hc" or "gpt"
 file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", paste0("clean_", group_name, ".csv"))
 data <- read.csv(file)
 
@@ -62,3 +62,14 @@ for (s in 1:nsubs) {
   run_iteration <- round(end_iteration - start_iteration, 2)
   print(paste0(s, " Iteration time: ", run_iteration, " secs"))
 }
+
+end_time = Sys.time()
+run_time = round(end_time - start_time, 2)
+print(paste0("Total run time: ", run_time))
+
+# make into df
+pred_success_df <- data.frame(pred_success)
+
+# save df
+savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("pred_success_", group_name, ".csv"))
+write.csv(pred_success_df, savefile)
