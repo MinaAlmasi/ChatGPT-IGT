@@ -46,7 +46,7 @@ samples <- jags.parallel(jags_data, inits=NULL, params,
 print(samples$BUGSoutput)
 
 # save bugs output to txt
-write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "summary_outcome_params_comparison.txt"))
+write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "outcome_summary_comparison.txt"))
 
 # extract params
 Y <- samples$BUGSoutput$sims.list
@@ -61,7 +61,13 @@ run_iteration <- round(end_iteration - start_iteration, 2)
 print(paste0("Iteration time: ", run_iteration))
 
 # make params into df
-params_df <- data.frame(mu, alpha, Smu_grp1, Smu_grp2)
+means_df <- data.frame("Smu_grp1" = Smu_grp1, "Smu_grp2" = Smu_grp2)
 
 # save params df
-write.csv(params_df, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "params_outcome_comparison.csv"))
+write.csv(means_df, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "outcome_subject_means.csv"))
+
+# make params into df
+params_df <- data.frame("mu" = mu, "alpha" = alpha)
+
+# save params df
+write.csv(params_df, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "outcome_params.csv"))
