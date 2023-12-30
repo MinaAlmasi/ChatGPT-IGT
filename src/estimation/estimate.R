@@ -57,6 +57,8 @@ samples <- jags.parallel(jags_data, inits=NULL, params,
 
 print(samples$BUGSoutput)
 
+write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "estimation", "estimated_parameters", paste0("summary_param_estimated_", group_name, ".txt")))
+
 # extact mu parameters
 Y <- samples$BUGSoutput$sims.list
 mu_a_rew <- Y$mu_a_rew
