@@ -1,0 +1,35 @@
+model { 
+
+  Gmu_grp1 ~ dnorm(0,.01) 
+  Gmu_grp2 ~ dnorm(0,.01) 
+
+  Glambda_grp1 ~ dgamma(1,1) 
+  Glambda_grp2 ~ dgamma(1,1) 
+
+  for (s in 1:nsubs) {
+
+    Smu_grp1[s] ~ dnorm(Gmu_grp1,Glambda_grp1)
+    Slambda_grp1[s] ~ dgamma(1,1)
+
+    for (t in 1:ntrials_ctr[s]) {
+  
+      X_grp1[s,t] ~ dnorm(Smu_grp1[s],Slambda_grp1[s])
+  
+    }
+  
+  }
+
+
+  for (s in 1:nsubs) {
+
+    Smu_grp2[s] ~ dnorm(Gmu_grp2,Glambda_grp2)
+    Slambda_grp2[s] ~ dgamma(1,1)
+
+    for (t in 1:ntrials_opi[s]) {
+  
+      X_grp2[s,t] ~ dnorm(Smu_grp2[s],Slambda_grp2[s])
+  
+    }
+  
+  }
+}
