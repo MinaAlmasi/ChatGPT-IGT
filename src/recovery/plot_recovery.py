@@ -14,7 +14,7 @@ def chance_level(n, alpha = 0.001, p = 0.5):
     
     return chance_level
 
-def plot_parameter(ax, df, true_col, infer_col, title, col="#343795"):
+def plot_parameter(ax, df, true_col, infer_col, title, col="#7C7D7C"):
     """
     Helper function to plot parameter recovery.
     """
@@ -105,7 +105,7 @@ def plot_descriptive_adequacy(df, save_path=None):
     fig, ax = plt.subplots(figsize=(10, 10))
 
     # Create bar plot with each subject (row) on the x-axis and the accuracy on the y-axis
-    ax.bar(df.index, df['Accuracy'], color='darkgrey')  # Set bars to dark grey
+    ax.bar(df.index, df['Accuracy'], color='#7C7D7C')  # Set bars to dark grey
 
     # Add a line for average accuracy across subjects, set to black
     ax.axhline(y=df['Accuracy'].mean(), linestyle='-', color='black')
