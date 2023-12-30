@@ -110,7 +110,7 @@ df <- data.frame(true_alpha_a_rew, true_alpha_a_pun, true_alpha_K, true_alpha_th
                 infer_alpha_a_rew, infer_alpha_a_pun, infer_alpha_K, infer_alpha_theta, infer_alpha_omega_f, infer_alpha_omega_p)
 
 # save df
-write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_group_comparisons.csv"))
+write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "param_recovery_group_comparisons.csv"))
 
 end_time <- Sys.time()
 run_time <- end_time - start_time

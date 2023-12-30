@@ -117,4 +117,4 @@ plot(true_omega_p,infer_omega_p)
 df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p, x_pred)
 
 # save to csv
-write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_single_subject.csv"), row.names=FALSE)
+write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "param_recovery_single_subject.csv"), row.names=FALSE)
