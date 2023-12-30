@@ -27,10 +27,10 @@ pred_success <- array(nsubs)
 
 start_time = Sys.time()
 for (s in 1:nsubs) {
-  
+  start_iteration = Sys.time()
   x <- x_all[s, ]
   X <- X_all[s, ]
-  ntrials <- ntrials[s]
+  ntrials <- 100
   
   # set up jags and run jags model on one subject
   data <- list("x","X","ntrials") 
@@ -44,18 +44,21 @@ for (s in 1:nsubs) {
   
   x_predict <- array(ntrials)
   
-  for (t in 1:ntrials) {
+  for (j in 1:ntrials) {
     p_predict <- c(
-      MPD(p_post[,t,1]),
-      MPD(p_post[,t,2]),
-      MPD(p_post[,t,3]),
-      MPD(p_post[,t,4])
+      MPD(p_post[,j,1]),
+      MPD(p_post[,j,2]),
+      MPD(p_post[,j,3]),
+      MPD(p_post[,j,4])
     )
     
-    x_predict[t] <- which.max(p_predict)
+    x_predict[j] <- which.max(p_predict)
     
   }
   
   pred_success[s] <- sum(x_predict==x[1:ntrials]) # only comparing with trials for which we have choices
-  print(s)
+    
+  end_iteration <- Sys.time()
+  run_iteration <- round(end_iteration - start_iteration, 2)
+  print(paste0(s, " Iteration time: ", run_iteration, " secs"))
 }
