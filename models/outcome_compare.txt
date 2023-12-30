@@ -11,7 +11,7 @@ model {
     Smu_grp1[s] ~ dnorm(Gmu_grp1,Glambda_grp1)
     Slambda_grp1[s] ~ dgamma(1,1)
 
-    for (t in 1:ntrials_ctr[s]) {
+    for (t in 1:ntrials[s]) {
   
       X_grp1[s,t] ~ dnorm(Smu_grp1[s],Slambda_grp1[s])
   
@@ -25,7 +25,7 @@ model {
     Smu_grp2[s] ~ dnorm(Gmu_grp2,Glambda_grp2)
     Slambda_grp2[s] ~ dgamma(1,1)
 
-    for (t in 1:ntrials_opi[s]) {
+    for (t in 1:ntrials[s]) {
   
       X_grp2[s,t] ~ dnorm(Smu_grp2[s],Slambda_grp2[s])
   
