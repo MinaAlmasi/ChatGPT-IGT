@@ -1,5 +1,5 @@
 #install.packages("pacman")
-pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
+pacman::p_load(hesim, extraDistr, R2jags, parallel)
 
 # set seed
 set.seed(2502)
