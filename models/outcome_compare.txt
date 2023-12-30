@@ -1,15 +1,17 @@
 model { 
+  ## priors ## 
+  alpha ~ dnorm(0, .1)
+  mu ~ dnorm(0, .1)
 
-  Gmu_grp1 ~ dnorm(0,.01) 
-  Gmu_grp2 ~ dnorm(0,.01) 
-
-  Glambda_grp1 ~ dgamma(1,1) 
-  Glambda_grp2 ~ dgamma(1,1) 
+  # variability between subjects 
+  Glambda ~ dgamma(.1, .1)
 
   for (s in 1:nsubs) {
 
-    Smu_grp1[s] ~ dnorm(Gmu_grp1,Glambda_grp1)
-    Slambda_grp1[s] ~ dgamma(1,1)
+    # variability between trials
+    Slambda_grp1[s] ~ dgamma(.1, .1)
+
+    Smu_grp1[s] ~ dnorm(mu - (alpha/2), Glambda)
 
     for (t in 1:ntrials[s]) {
   
@@ -22,8 +24,10 @@ model {
 
   for (s in 1:nsubs) {
 
-    Smu_grp2[s] ~ dnorm(Gmu_grp2,Glambda_grp2)
-    Slambda_grp2[s] ~ dgamma(1,1)
+    # variability between trials
+    Slambda_grp2[s] ~ dgamma(.1, .1)
+
+    Smu_grp2[s] ~ dnorm(mu + (alpha/2), Glambda)
 
     for (t in 1:ntrials[s]) {
   
