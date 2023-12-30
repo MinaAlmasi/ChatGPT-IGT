@@ -25,16 +25,20 @@ ntrials <- 100
 true_a_rew <- array(NA,c(n_iterations))
 true_a_pun <- array(NA,c(n_iterations))
 true_K <- array(NA,c(n_iterations))
-true_theta <- array(NA,c(n_iterations))
 true_omega_f <- array(NA,c(n_iterations))
 true_omega_p <- array(NA,c(n_iterations))
 
 infer_a_rew <- array(NA,c(n_iterations))
 infer_a_pun <- array(NA,c(n_iterations))
 infer_K <- array(NA,c(n_iterations))
-infer_theta <- array(NA,c(n_iterations))
 infer_omega_f <- array(NA,c(n_iterations))
 infer_omega_p <- array(NA,c(n_iterations))
+
+# only define theta infer and true if theta is not fixed (i.e. if fixed_theta = FALSE)
+if(!fixed_theta) {
+    infer_theta <- array(NA,c(n_iterations))
+    true_theta <- array(NA,c(n_iterations))
+}
 
 x_pred <- array(NA,c(n_iterations, ntrials))
 
@@ -76,7 +80,6 @@ for (i in 1:n_iterations) {
     true_a_rew[i] <- a_rew
     true_a_pun[i] <- a_pun
     true_K[i] <- K
-    true_theta[i] <- theta
     true_omega_f[i] <- omega_f
     true_omega_p[i] <- omega_p
     
@@ -85,9 +88,14 @@ for (i in 1:n_iterations) {
     infer_a_rew[i] <- MPD(Y$a_rew)
     infer_a_pun[i] <- MPD(Y$a_pun)
     infer_K[i] <- MPD(Y$K)
-    infer_theta[i] <- MPD(Y$theta)
     infer_omega_f[i] <- MPD(Y$omega_f)
     infer_omega_p[i] <- MPD(Y$omega_p)
+
+    # only define theta if not fixed
+    if(!fixed_theta) {
+        infer_theta[i] <- MPD(Y$theta)
+        true_theta[i] <- theta
+    }
 
     # inferred choice based on probabilities
     # set up x_pred for the subject
