@@ -60,7 +60,7 @@ for (s in 1:nsubs) {
     
   end_iteration <- Sys.time()
   run_iteration <- round(end_iteration - start_iteration, 2)
-  print(paste0(s, " Iteration time: ", run_iteration, " secs"))
+  print(paste0(s, " Iteration time: ", run_iteration))
 }
 
 end_time = Sys.time()
