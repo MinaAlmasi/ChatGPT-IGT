@@ -18,8 +18,8 @@ source(file.path(root_path, "ChatGPT-IGT", "src", "data_util.R"))
 data_vars <- processData(data)
 
 # unpack vars
-x <- data_vars$x
-X <- data_vars$X
+x_all <- data_vars$x
+X_all <- data_vars$X
 ntrials <- data_vars$ntrials
 nsubs <- data_vars$nsubs
 
@@ -28,9 +28,8 @@ pred_success <- array(nsubs)
 start_time = Sys.time()
 for (s in 1:nsubs) {
   
-  x <- x[s, ]
-  X <- X[s, ]
-  
+  x <- x_all[s, ]
+  X <- X_all[s, ]
   ntrials <- ntrials[s]
   
   # set up jags and run jags model on one subject
