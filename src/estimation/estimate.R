@@ -11,8 +11,6 @@ group_name = "gpt"
 file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", paste0("clean_", group_name, ".csv"))
 data <- read.csv(file)
 
-MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
-
 # extract relevant variables
 subIDs <- unique(data$subjID)
 nsubs <- length(subIDs)
