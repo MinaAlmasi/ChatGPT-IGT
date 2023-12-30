@@ -60,6 +60,9 @@ def savage_dickey_plot(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"), (
         # only add legend to plot number 3
         if i == 2:
             x.legend()
+        
+        # rm x-label
+        x.set_xlabel("")
 
         # annotate Savage-Dickey density ratio
         x.text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=x.transAxes, verticalalignment='top')
