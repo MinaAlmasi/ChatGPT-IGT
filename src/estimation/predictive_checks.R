@@ -38,7 +38,7 @@ for (s in 1:nsubs) {
   model_file <- file.path(root_path, "ChatGPT-IGT", "models", "ORL.txt")
   temp_samples <- jags.parallel(data, inits=NULL, params,
                                 model.file =model_file,
-                                n.chains=3, n.iter=5000, n.burnin=1000, n.thin=1, n.cluster=3)
+                                n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=3)
   
   p_post <- temp_samples$BUGSoutput$sims.list$p
   
