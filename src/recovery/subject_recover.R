@@ -4,10 +4,17 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel, ggpubr)
 # set seed
 set.seed(2502)
 
-# read json
+# define whether theta is fixed or not
+fixed_theta <- TRUE
+
+# define root path depending on whether it is run locally or on Ucloud
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
-file <- file.path(root_path, "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_single_subject_data.json")
+
+# define filename based on whether theta is fixed or not
+filename <- paste0("simulated_single_subject_data", if(fixed_theta) "_fixed_theta", ".json")
+
+file <- file.path(root_path, "ChatGPT-IGT", "src", "recovery", "simulated_data", filename)
 data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
@@ -50,11 +57,16 @@ for (i in 1:n_iterations) {
     # change x from values 0, 1, 2, 3 to 1, 2, 3, 4
     x <- x + 1
 
-    # setup jags 
+    # setup jags
     jags_data <- list("x", "X", "ntrials")
     params <- c("a_rew", "a_pun", "K", "theta", "omega_f", "omega_p", "p")
-    model_file <- file.path(root_path, "ChatGPT-IGT", "models", "ORL.txt")
+    
+    # change setup depending on whether theta is fixed or not
+    params <- if(fixed_theta) setdiff(params, "theta") else params # rm theta from params to recover if fixed
+    model_filename <- paste0("ORL", if(fixed_theta) "_fixed_theta", ".txt")
+    model_file <- file.path(root_path, "ChatGPT-IGT", "models", model_filename)
 
+    # initialize JAGS
     samples <- jags.parallel(jags_data, inits = NULL, params,
                 model.file = model_file, n.chains = 3, 
                 n.iter = 3000, n.burnin = 1000, n.thin = 1, n.cluster = 3)
@@ -117,4 +129,5 @@ plot(true_omega_p,infer_omega_p)
 df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p, x_pred)
 
 # save to csv
-write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "param_recovery_single_subject.csv"), row.names=FALSE)
+savefile_name = paste0("param_recovery_single_subject_", if(fixed_theta) "fixed_theta", ".csv")
+write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", savefile_name), row.names=FALSE)

@@ -1,0 +1,80 @@
+model {
+
+  a_rew ~ dunif(0,1)
+  a_pun ~ dunif(0,1)
+  K  ~ dnorm(0,.1)T(0,)
+  theta <- 1 # dnorm(0,.1)T(0,)
+  omega_f ~ dnorm(0,.1)
+  omega_p ~ dnorm(0,.1)
+
+  #------ set t1 model variables --------------------------
+    
+  Ev[1,1] <- 0
+  Ev[1,2] <- 0
+  Ev[1,3] <- 0
+  Ev[1,4] <- 0
+    
+  Ef[1,1] <- 0
+  Ef[1,2] <- 0
+  Ef[1,3] <- 0
+  Ef[1,4] <- 0
+    
+  PS[1,1] <- 1
+  PS[1,2] <- 1
+  PS[1,3] <- 1
+  PS[1,4] <- 1
+  
+  p[1,1] <- .25
+  p[1,2] <- .25
+  p[1,3] <- .25
+  p[1,4] <- .25
+
+  for (t in 2:ntrials) {
+    
+    #this is imortant mention this as constructing model
+    signX[t] <- ifelse(X[t-1]<0,-1,1)
+    
+    for (d in 1:4) {
+      
+      # -------- Updating expected values ------------------------
+      Ev_update[t,d] <- ifelse(X[t-1]>=0,
+                                Ev[t-1,d] + a_rew*((X[t-1]) - Ev[t-1,d]), 
+                                Ev[t-1,d] + a_pun*((X[t-1]) - Ev[t-1,d])
+      )
+                            
+      Ev[t,d] <- ifelse(d==x[t-1],Ev_update[t,d],Ev[t-1,d])
+      
+      # -------- Updating expected frequencies ------------------------
+      #update expected frequencies for ALL decks - AS IF THERE WERE ALL CHOSEN
+      Ef_cho[t,d] <- ifelse(X[t-1]>=0, 
+                              Ef[t-1,d] + a_rew*(signX[t] - Ef[t-1,d]),
+                              Ef[t-1,d] + a_pun*(signX[t] - Ef[t-1,d])
+      )
+      
+      #update expected frequencies for ALL decks - AS IF THEY WERE ALL UNCHOSEN. 
+      Ef_not[t,d] <- ifelse(X[t-1]>=0, 
+                              Ef[t-1,d] + a_pun*(-(signX[t]/3) - Ef[t-1,d]),
+                              Ef[t-1,d] + a_rew*(-(signX[t]/3) - Ef[t-1,d])
+      ) 
+      
+      #copy appropriate values to ef variable
+      Ef[t,d] <- ifelse(d==x[t-1],Ef_cho[t,d],Ef_not[t,d])  
+      #------------------------------------------------------------------
+      
+      #ifelse needed to disctiminate chosen and unchosen decks
+      PS[t,d] <- ifelse(x[t-1]==d,1/(1+K),PS[t-1,d]/(1+K))
+      
+      V[t,d] <- Ev[t,d] + Ef[t,d]*omega_f + PS[t,d]*omega_p
+      
+      exp_p[t,d] <- exp(theta*V[t,d])
+      
+    }
+    
+    for (d in 1:4) {
+      p[t,d] <- exp_p[t,d]/sum(exp_p[t,])
+    }
+      
+    x[t] ~ dcat(p[t,])
+    
+  }
+}
