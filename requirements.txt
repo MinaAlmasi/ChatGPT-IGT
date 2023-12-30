@@ -4,3 +4,4 @@ numpy
 tqdm
 scipy
 matplotlib
+seaborn
