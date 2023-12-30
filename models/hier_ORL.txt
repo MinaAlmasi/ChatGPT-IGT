@@ -4,8 +4,8 @@ model {
   mu_a_pun ~ dnorm(0,1)T(0,1)
   mu_K ~ dnorm(0,1)T(0,)
   mu_theta ~ dnorm(0,1)T(0,)
-  mu_omega_f ~ dnorm(0,.1)
-  mu_omega_p ~ dnorm(0,.1)
+  mu_omega_f ~ dnorm(0,1)
+  mu_omega_p ~ dnorm(0,1)
 
   lambda_a_rew ~ dgamma(.01,.01)
   lambda_a_pun ~ dgamma(.01,.01)
