@@ -125,16 +125,19 @@ end_time <- Sys.time()
 run_time <- end_time - start_time
 print(run_time)
 
-par(mfrow=c(3,2))
-plot(true_a_rew,infer_a_rew)
-plot(true_a_pun,infer_a_pun)
-plot(true_K,infer_K)
-plot(true_theta,infer_theta)
-plot(true_omega_f,infer_omega_f)
-plot(true_omega_p,infer_omega_p)
 
-# save to df with n_iterations rows and 12 columns (6 true, 6 infer)
-df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p, x_pred)
+# create df with n_iterations rows and 12 columns (6 true, 6 infer), 
+if(fixed_theta) {
+  # df if theta is fixed
+  df <- data.frame(true_a_rew, true_a_pun, true_K, true_omega_f, true_omega_p, 
+                   infer_a_rew, infer_a_pun, infer_K, infer_omega_f, infer_omega_p, 
+                   x_pred)
+} else {
+  # df if theta is NOT fixed
+  df <- data.frame(true_a_rew, true_a_pun, true_K, true_theta, true_omega_f, true_omega_p, 
+                   infer_a_rew, infer_a_pun, infer_K, infer_theta, infer_omega_f, infer_omega_p, 
+                   x_pred)
+}
 
 # save to csv
 savefile_name = paste0("param_recovery_single_subject_", if(fixed_theta) "fixed_theta", ".csv")
