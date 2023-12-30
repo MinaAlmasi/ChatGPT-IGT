@@ -33,9 +33,35 @@ nsubs <- gpt_vars$nsubs
 jags_data <- list("x_grp1", "X_grp1", "x_grp2", "X_grp2", "ntrials", "nsubs")
 params<-c("mu", "alpha", "Smu_grp1", "Smu_grp2")
 
+# set timer
+start_iteration = Sys.time()
+
 # run jags
 print("Intializing JAGS ...")
 model_file <- file.path(root_path, "ChatGPT-IGT", "models", "outcome_compare.txt")
 samples <- jags.parallel(jags_data, inits=NULL, params,
                 model.file =model_file,
                 n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
+
+print(samples$BUGSoutput)
+
+# save bugs output to txt
+write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "summary_outcome_params_comparison.txt"))
+
+# extract params
+Y <- samples$BUGSoutput$sims.list
+mu <- Y$mu
+alpha <- Y$alpha
+Smu_grp1 <- Y$Smu_grp1
+Smu_grp2 <- Y$Smu_grp2
+
+# time
+end_iteration <- Sys.time()
+run_iteration <- round(end_iteration - start_iteration, 2)
+print(paste0("Iteration time: ", run_iteration))
+
+# make params into df
+params_df <- data.frame(mu, alpha, Smu_grp1, Smu_grp2)
+
+# save params df
+write.csv(params_df, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "params_outcome_comparison.csv"))
