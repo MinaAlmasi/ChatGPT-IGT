@@ -137,8 +137,8 @@ def plot_descriptive_adequacy(df, save_path=None):
 def main(): 
     # define paths
     path = pathlib.Path(__file__)
-    single_subj_path = path.parents[2] / "src" / "recovery" / "recovered_parameters" / "param_recovery_single_subject.csv"
-    group_path = path.parents[2] / "src" / "recovery" / "recovered_parameters" / "param_recovery_group_ALL.csv"
+    single_subj_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_single_subject.csv"
+    group_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL.csv"
 
     # load recovered parameters
     subject_data = pd.read_csv(single_subj_path)
