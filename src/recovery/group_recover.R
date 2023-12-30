@@ -135,7 +135,7 @@ for (i in 1:n_groups) {
 
     # save to csv
     filename = paste0("param_recovery_group_", i, ".csv")
-    write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "groups", filename))
+    write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "groups", filename))
     
     # time 
     end_iteration <- Sys.time()
@@ -148,7 +148,7 @@ df <- data.frame(true_mu_a_rew, true_mu_a_pun, true_mu_K, true_mu_theta, true_mu
                  true_lambda_a_rew, true_lambda_a_pun, true_lambda_K, true_lambda_theta, true_lambda_omega_f, true_lambda_omega_p, infer_lambda_a_rew, infer_lambda_a_pun, infer_lambda_K, infer_lambda_theta, infer_lambda_omega_f, infer_lambda_omega_p)
 
 # save to csv
-write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "recovered_parameters", "param_recovery_group_ALL.csv"), row.names=FALSE)
+write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "param_recovery_group_ALL.csv"), row.names=FALSE)
 
 end_time <- Sys.time()
 run_time <- end_time - start_time
