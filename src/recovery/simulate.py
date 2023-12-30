@@ -299,5 +299,8 @@ def main():
                                 fixed_theta=None, 
                                 save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_group_data.json")    
     
+    # simulate subject data with fixed theta
+    subject_fixed_theta = generate_subject_data(100, payoff_structure, fixed_theta=1, save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data_fixed_theta.json")
+
 if __name__ == "__main__":
     main()
