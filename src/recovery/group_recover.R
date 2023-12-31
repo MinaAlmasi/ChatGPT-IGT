@@ -4,9 +4,15 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel)
 # set seed
 set.seed(2502)
 
+# define whether theta is fixed or not
+fixed_theta <- FALSE
+
 # read json
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
+
+# define filename based on whether theta is fixed or not
+filename <- paste0("simulated_group_data", if(fixed_theta) "_fixed_theta", ".json")
 file <- file.path(root_path, "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_group_data.json")
 data <- jsonlite::fromJSON(file)
 
