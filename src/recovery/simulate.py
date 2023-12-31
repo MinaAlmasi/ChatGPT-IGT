@@ -177,8 +177,8 @@ def generate_subject_data(n_iterations, payoff_structure, fixed_theta:float=None
 def simulate_group_ORL(payoff_array, n_trials, n_subs,
                         mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p, 
                         sigma_a_rew,sigma_a_pun,
-                        sigma_K, sigma_theta, sigma_omega_f,sigma_omega_p
-                         ):
+                        sigma_K, sigma_omega_f,sigma_omega_p, sigma_theta=None,
+                        fixed_theta:float=None):
     '''
     Simulate hierarchical ORL (group level) to use for parameter recovery
     '''
@@ -193,9 +193,18 @@ def simulate_group_ORL(payoff_array, n_trials, n_subs,
         a_rew = truncnorm.rvs((0 - mu_a_rew) / sigma_a_rew, (1 - mu_a_rew) / sigma_a_rew, loc=mu_a_rew, scale=sigma_a_rew)
         a_pun = truncnorm.rvs((0 - mu_a_pun) / sigma_a_pun, (1 - mu_a_pun) / sigma_a_pun, loc=mu_a_pun, scale=sigma_a_pun)
         K = truncnorm.rvs((0 - mu_K) / sigma_K, (5 - mu_K) / sigma_K, loc=mu_K, scale=sigma_K)
-        theta = truncnorm.rvs((0 - mu_theta) / sigma_theta, (5 - mu_theta) / sigma_theta, loc=mu_theta, scale=sigma_theta)
         omega_f = truncnorm.rvs((-2 - mu_omega_f) / sigma_omega_f, (2 - mu_omega_f) / sigma_omega_f, loc=mu_omega_f, scale=sigma_omega_f)
         omega_p = truncnorm.rvs((-2 - mu_omega_p) / sigma_omega_p, (2 - mu_omega_p) / sigma_omega_p, loc=mu_omega_p, scale=sigma_omega_p)
+
+        # if sigma_theta is None and Fixed theta is None, then raise valueerror, stating that you cannot have both sigma_theta and fixed_theta as None
+        if sigma_theta is None and fixed_theta is None:
+            raise ValueError("You must specify either sigma_theta or fixed_theta. If theta is fixed, then sigma_theta should be None.")
+
+        # if fixed_theta is None, then sample theta from a truncated normal distribution
+        if fixed_theta is None:
+            theta = truncnorm.rvs((0 - mu_theta) / sigma_theta, (5 - mu_theta) / sigma_theta, loc=mu_theta, scale=sigma_theta)
+        else:
+            theta = fixed_theta
 
         # run ORL 
         results = simulate_ORL(payoff_array, n_trials, a_rew, a_pun, K, theta, omega_f, omega_p)
@@ -209,11 +218,11 @@ def simulate_group_ORL(payoff_array, n_trials, n_subs,
     
     return data
 
-def generate_group_data(payoff_structure, n_iterations=20, n_subs=48, fixed_theta:tuple=None, save_path:pathlib.Path=None):
+def generate_group_data(payoff_structure, n_iterations=20, n_subs=48, fixed_theta:float=None, save_path:pathlib.Path=None):
     '''
     generate group data for parameter recovery
 
-    NB. if fixed_theta is not None, then it should be a tuple of (mu_theta, sigma_theta) values!!
+    NB. if fixed_theta is not None, give a mu_theta value!
     '''
     results_list = []
 
@@ -236,31 +245,33 @@ def generate_group_data(payoff_structure, n_iterations=20, n_subs=48, fixed_thet
             mu_theta = np.random.uniform(0, 5)
             sigma_theta = np.random.uniform(0, 0.2)
         else:
-            mu_theta = fixed_theta[0]
-            sigma_theta = fixed_theta[1]
+            mu_theta = fixed_theta
+            sigma_theta = None
 
         # run ORL
         results = simulate_group_ORL(payoff_structure, n_trials=100, n_subs=n_subs,
                             mu_a_rew=mu_a_rew, mu_a_pun=mu_a_pun, mu_K=mu_K, 
                             mu_theta=mu_theta, mu_omega_f=mu_omega_f, mu_omega_p=mu_omega_p,
                             sigma_a_rew=sigma_a_rew, sigma_a_pun=sigma_a_pun, sigma_K=sigma_K,
-                            sigma_theta=sigma_theta, sigma_omega_f=sigma_omega_f, sigma_omega_p=sigma_omega_p
+                            sigma_theta=sigma_theta, sigma_omega_f=sigma_omega_f, sigma_omega_p=sigma_omega_p, fixed_theta=fixed_theta
                             )
 
         # add parameters to results
         results['mu_a_rew'] = mu_a_rew
         results['mu_a_pun'] = mu_a_pun
         results['mu_K'] = mu_K
-        results['mu_theta'] = mu_theta
         results['mu_omega_f'] = mu_omega_f
         results['mu_omega_p'] = mu_omega_p
 
         results['sigma_a_rew'] = sigma_a_rew
         results['sigma_a_pun'] = sigma_a_pun
         results['sigma_K'] = sigma_K
-        results['sigma_theta'] = sigma_theta
         results['sigma_omega_f'] = sigma_omega_f
         results['sigma_omega_p'] = sigma_omega_p
+
+        if fixed_theta is None:
+            results['mu_theta'] = mu_theta
+            results['sigma_theta'] = sigma_theta
 
         results_list.append(results)
 
@@ -289,7 +300,7 @@ def main():
     
     # translate payoff structure
     payoff_structure = translate_payoff(payoff_df)
-
+    
     # simulate ORL data
     subject = generate_subject_data(100, payoff_structure, fixed_theta=None, save_path= path.parents[2] / "src" / "recovery" / "simulated_data" /  "simulated_single_subject_data.json")
     
@@ -301,6 +312,12 @@ def main():
     
     # simulate subject data with fixed theta
     subject_fixed_theta = generate_subject_data(100, payoff_structure, fixed_theta=1, save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data_fixed_theta.json")
+
+    # simulate group data with fixed theta
+    group_fixed_theta = generate_group_data(
+                                payoff_structure, n_iterations=100, n_subs=30, 
+                                fixed_theta=1, 
+                                save_path=path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_group_data_fixed_theta.json")
 
 if __name__ == "__main__":
     main()
