@@ -167,7 +167,7 @@ if(!fixed_theta){
 }
 
 # save to csv
-savefile_name = paste0("param_recovery_group_ALL", if(fixed_theta) "fixed_theta", ".csv")
+savefile_name = paste0("param_recovery_group_ALL_", if(fixed_theta) "fixed_theta", ".csv")
 write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", savefile_name), row.names=FALSE)
 
 end_time <- Sys.time()
