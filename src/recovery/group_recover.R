@@ -13,7 +13,7 @@ root_path <- "~/Desktop/dm-code" # personal comp
 
 # define filename based on whether theta is fixed or not
 filename <- paste0("simulated_group_data", if(fixed_theta) "_fixed_theta", ".json")
-file <- file.path(root_path, "ChatGPT-IGT", "src", "recovery", "simulated_data", "simulated_group_data.json")
+file <- file.path(root_path, "ChatGPT-IGT", "src", "recovery", "simulated_data", filename)
 data <- jsonlite::fromJSON(file)
 
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
