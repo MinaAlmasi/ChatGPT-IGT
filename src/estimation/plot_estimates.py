@@ -28,14 +28,13 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters
             "mu_K": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
             "mu_theta": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
             "mu_omega_f": lambda size: np.random.normal(0, 1, size),
-            "mu_omega_p": lambda size: np.random.normal(0, 1, size),
-            # Add other priors if necessary
+            "mu_omega_p": lambda size: np.random.normal(0, 1, size)
         }
 
     for i, (param_name, param_title) in enumerate(parameters):
         ax = axs[i // 2, i % 2]
         sns.kdeplot(hc_data[param_name], ax=ax, fill=True, alpha=0.5, label="HC", color=colors[0])
-        sns.kdeplot(gpt_data[param_name], ax=ax, fill=True, alpha=0.5, label="GPT", color=colors[1])
+        sns.kdeplot(gpt_data[param_name], ax=ax, fill=True, alpha=0.5, label="ChatGPT", color=colors[1])
 
         # Plot prior if show_priors is True
         if show_priors and priors:
@@ -49,6 +48,50 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
+
+def plot_hc_posteriors(main_hc_sample, other_hc_samples, parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), ("mu_K", "$\mu K$"), ("mu_theta","$\mu \\theta$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], save_path=None, show_priors=False):
+    fig, axs = plt.subplots(3, 2, figsize=(10, 10))
+    plt.subplots_adjust(hspace=0.5)
+
+    # Define colors
+    main_color = "#398A20"  # Green for the main dataframe
+    other_color = "#D3D3D3"  # Light grey for other dataframes
+
+    # Define prior distributions only if show_priors is True
+    priors = None
+    if show_priors:
+        priors = {
+            "mu_a_rew": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
+            "mu_a_pun": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
+            "mu_K": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
+            "mu_theta": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
+            "mu_omega_f": lambda size: np.random.normal(0, 1, size),
+            "mu_omega_p": lambda size: np.random.normal(0, 1, size)
+        }
+
+    for i, (param_name, param_title) in enumerate(parameters):
+        ax = axs[i // 2, i % 2]
+
+        # Plot for main dataframe
+        sns.kdeplot(main_hc_sample[param_name], ax=ax, fill=True, alpha=0.5, label="Main", color=main_color)
+
+        # Plot for other dataframes
+        for other_df in other_hc_samples:
+            sns.kdeplot(other_df[param_name], ax=ax, fill=True, alpha=0.5, color=other_color, legend=False)
+
+        # Plot prior if show_priors is True
+        if show_priors and priors:
+            prior_samples = priors[param_name](1000)
+            sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5, label="Prior")
+
+        ax.set_title(param_title)
+        ax.set_xlabel("Value")
+        ax.set_ylabel("Density")
+        ax.legend()
+
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+
 
 def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C", "#3C5299"], save_path=None):
     '''
@@ -76,7 +119,7 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     df = df.sort_values(by=['pred_success'], ascending=False).reset_index(drop=True)
 
     # Create bar plot with each subject (row) on the x-axis and the accuracy on the y-axis and colored by group
-    sns.barplot(x=df.index, y=df['pred_success'], hue=df['group'], ax=ax, palette=[colors[0], colors[1]])
+    sns.barplot(x=df.index, y=df['pred_success'], hue=df['group'], ax=ax, palette=[colors[1], colors[0]])
 
     # Calculate mean accuracies
     hc_mean = df[df['group'] == 'HC']['pred_success'].mean()
@@ -100,9 +143,10 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
 
     # Create custom legend
     handles, labels = ax.get_legend_handles_labels()
-    handles.extend([plt.Line2D([], [], color=colors[0], linestyle='-'),
-                    plt.Line2D([], [], color=colors[1], linestyle='-')])
-    labels.extend(['Mean HC', 'Mean ChatGPT'])
+    handles.extend([plt.Line2D([], [], color=colors[1], linestyle='-'),
+                    plt.Line2D([], [], color=colors[0], linestyle='-'),
+                    plt.Line2D([], [], color='black', linestyle='--')])
+    labels.extend(['ChatGPT (Mean)', 'HC (Mean)', 'Chance Level'])
     ax.legend(handles, labels, loc='upper right')
 
     # Save the plot if a save path is provided
