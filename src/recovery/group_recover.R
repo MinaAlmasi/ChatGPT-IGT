@@ -29,14 +29,12 @@ data <- lapply(data, function(x) x[1:n_groups])
 true_mu_a_rew <- array(NA,c(n_groups))
 true_mu_a_pun <- array(NA,c(n_groups))
 true_mu_K <- array(NA,c(n_groups))
-true_mu_theta <- array(NA,c(n_groups))
 true_mu_omega_f <- array(NA,c(n_groups))
 true_mu_omega_p <- array(NA,c(n_groups))
 
 infer_mu_a_rew <- array(NA,c(n_groups))
 infer_mu_a_pun <- array(NA,c(n_groups))
 infer_mu_K <- array(NA,c(n_groups))
-infer_mu_theta <- array(NA,c(n_groups))
 infer_mu_omega_f <- array(NA,c(n_groups))
 infer_mu_omega_p <- array(NA,c(n_groups))
 
@@ -44,17 +42,23 @@ infer_mu_omega_p <- array(NA,c(n_groups))
 true_lambda_a_rew <- array(NA,c(n_groups))
 true_lambda_a_pun <- array(NA,c(n_groups))
 true_lambda_K <- array(NA,c(n_groups))
-true_lambda_theta <- array(NA,c(n_groups))
 true_lambda_omega_f <- array(NA,c(n_groups))
 true_lambda_omega_p <- array(NA,c(n_groups))
 
 infer_lambda_a_rew <- array(NA,c(n_groups))
 infer_lambda_a_pun <- array(NA,c(n_groups))
 infer_lambda_K <- array(NA,c(n_groups))
-infer_lambda_theta <- array(NA,c(n_groups))
 infer_lambda_omega_f <- array(NA,c(n_groups))
 infer_lambda_omega_p <- array(NA,c(n_groups))
 
+if(!fixed_theta) {
+    true_mu_theta <- array(NA,c(n_groups))
+    infer_mu_theta <- array(NA,c(n_groups))
+    true_lambda_theta <- array(NA,c(n_groups))
+    infer_lambda_theta <- array(NA,c(n_groups))
+}
+
+print(paste0("Working on file: ", basename(file)))
 start_time = Sys.time()
 for (i in 1:n_groups) {
     start_iteration = Sys.time()
@@ -73,25 +77,36 @@ for (i in 1:n_groups) {
     mu_a_rew <- as.numeric(data$mu_a_rew[i])
     mu_a_pun <- as.numeric(data$mu_a_pun[i])
     mu_K <- as.numeric(data$mu_K[i])
-    mu_theta <- as.numeric(data$mu_theta[i])
     mu_omega_f <- as.numeric(data$mu_omega_f[i])
     mu_omega_p <- as.numeric(data$mu_omega_p[i])
 
     sigma_a_rew <- as.numeric(data$sigma_a_rew[i])
     sigma_a_pun <- as.numeric(data$sigma_a_pun[i])
     sigma_K <- as.numeric(data$sigma_K[i])
-    sigma_theta <- as.numeric(data$sigma_theta[i])
+
     sigma_omega_f <- as.numeric(data$sigma_omega_f[i])
     sigma_omega_p <- as.numeric(data$sigma_omega_p[i])
+
+    if (!fixed_theta) {
+        mu_theta <- as.numeric(data$mu_theta[i])
+        sigma_theta <- as.numeric(data$sigma_theta[i])
+    }
 
     ntrials <- rep(dim(x)[2], dim(x)[1]) # trials, subjects (defined by the dimensions of the choices)
     
     # setup jags
     jags_data <- list("x", "X", "ntrials", "nsubs")
-    params <- c("mu_a_rew", "mu_a_pun", "mu_K", "mu_theta", "mu_omega_f", "mu_omega_p",
+
+    # change setup depending on whether theta is fixed or not
+    if (!fixed_theta) {
+        params <- c("mu_a_rew", "mu_a_pun", "mu_K", "mu_theta", "mu_omega_f", "mu_omega_p",
                 "lambda_a_rew", "lambda_a_pun", "lambda_K", "lambda_theta", "lambda_omega_f", "lambda_omega_p")
-    
-    model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL.txt")
+        model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL.txt")
+    } else {
+        params <- c("mu_a_rew", "mu_a_pun", "mu_K", "mu_omega_f", "mu_omega_p",
+                "lambda_a_rew", "lambda_a_pun", "lambda_K", "lambda_omega_f", "lambda_omega_p")
+        model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL_fixed_theta.txt")
+    }
 
     print("Intializing JAGS ...")
     samples <- jags.parallel(jags_data, inits = NULL, params,
@@ -104,7 +119,6 @@ for (i in 1:n_groups) {
     true_mu_a_rew[i] <- mu_a_rew
     true_mu_a_pun[i] <- mu_a_pun
     true_mu_K[i] <- mu_K
-    true_mu_theta[i] <- mu_theta
     true_mu_omega_f[i] <- mu_omega_f
     true_mu_omega_p[i] <- mu_omega_p
     
@@ -113,7 +127,6 @@ for (i in 1:n_groups) {
     infer_mu_a_rew[i] <- MPD(Y$mu_a_rew)
     infer_mu_a_pun[i] <- MPD(Y$mu_a_pun)
     infer_mu_K[i] <- MPD(Y$mu_K)
-    infer_mu_theta[i] <- MPD(Y$mu_theta)
     infer_mu_omega_f[i] <- MPD(Y$mu_omega_f)
     infer_mu_omega_p[i] <- MPD(Y$mu_omega_p)
     
@@ -121,7 +134,6 @@ for (i in 1:n_groups) {
     true_lambda_a_rew[i] <- 1/sigma_a_rew
     true_lambda_a_pun[i] <- 1/sigma_a_pun
     true_lambda_K[i] <- 1/sigma_K
-    true_lambda_theta[i] <- 1/sigma_theta
     true_lambda_omega_f[i] <- 1/sigma_omega_f
     true_lambda_omega_p[i] <- 1/sigma_omega_p
     
@@ -129,19 +141,15 @@ for (i in 1:n_groups) {
     infer_lambda_a_rew[i] <- MPD(Y$lambda_a_rew)
     infer_lambda_a_pun[i] <- MPD(Y$lambda_a_pun)
     infer_lambda_K[i] <- MPD(Y$lambda_K)
-    infer_lambda_theta[i] <- MPD(Y$lambda_theta)
     infer_lambda_omega_f[i] <- MPD(Y$lambda_omega_f)
     infer_lambda_omega_p[i] <- MPD(Y$lambda_omega_p)
 
-    # save true and recovered params for each group
-    df = data.frame(i, true_mu_a_rew[i], true_mu_a_pun[i], true_mu_K[i], true_mu_theta[i], true_mu_omega_f[i], true_mu_omega_p[i],
-                    infer_mu_a_rew[i], infer_mu_a_pun[i], infer_mu_K[i], infer_mu_theta[i], infer_mu_omega_f[i], infer_mu_omega_p[i],
-                    true_lambda_a_rew[i], true_lambda_a_pun[i], true_lambda_K[i], true_lambda_theta[i], true_lambda_omega_f[i], true_lambda_omega_p[i],
-                    infer_lambda_a_rew[i], infer_lambda_a_pun[i], infer_lambda_K[i], infer_lambda_theta[i], infer_lambda_omega_f[i], infer_lambda_omega_p[i])
-
-    # save to csv
-    filename = paste0("param_recovery_group_", i, ".csv")
-    write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "groups", filename))
+    if(!fixed_theta) {
+        true_mu_theta[i] <- mu_theta
+        infer_mu_theta[i] <- MPD(Y$mu_theta)
+        true_lambda_theta[i] <- 1/sigma_theta
+        infer_lambda_theta[i] <- MPD(Y$lambda_theta)
+    }
     
     # time 
     end_iteration <- Sys.time()
@@ -150,11 +158,17 @@ for (i in 1:n_groups) {
 }   
 
 # save to df with n_groups rows and 12 columns (6 true, 6 infer)
-df <- data.frame(true_mu_a_rew, true_mu_a_pun, true_mu_K, true_mu_theta, true_mu_omega_f, true_mu_omega_p, infer_mu_a_rew, infer_mu_a_pun, infer_mu_K, infer_mu_theta, infer_mu_omega_f, infer_mu_omega_p,
+if(!fixed_theta){
+    df <- data.frame(true_mu_a_rew, true_mu_a_pun, true_mu_K, true_mu_theta, true_mu_omega_f, true_mu_omega_p, infer_mu_a_rew, infer_mu_a_pun, infer_mu_K, infer_mu_theta, infer_mu_omega_f, infer_mu_omega_p,
                  true_lambda_a_rew, true_lambda_a_pun, true_lambda_K, true_lambda_theta, true_lambda_omega_f, true_lambda_omega_p, infer_lambda_a_rew, infer_lambda_a_pun, infer_lambda_K, infer_lambda_theta, infer_lambda_omega_f, infer_lambda_omega_p)
+} else {
+    df <- data.frame(true_mu_a_rew, true_mu_a_pun, true_mu_K, true_mu_omega_f, true_mu_omega_p, infer_mu_a_rew, infer_mu_a_pun, infer_mu_K, infer_mu_omega_f, infer_mu_omega_p,
+                 true_lambda_a_rew, true_lambda_a_pun, true_lambda_K, true_lambda_omega_f, true_lambda_omega_p, infer_lambda_a_rew, infer_lambda_a_pun, infer_lambda_K, infer_lambda_omega_f, infer_lambda_omega_p)
+}
 
 # save to csv
-write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", "param_recovery_group_ALL.csv"), row.names=FALSE)
+savefile_name = paste0("param_recovery_group_ALL", if(fixed_theta) "fixed_theta", ".csv")
+write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "recovery", "results", savefile_name), row.names=FALSE)
 
 end_time <- Sys.time()
 run_time <- end_time - start_time
