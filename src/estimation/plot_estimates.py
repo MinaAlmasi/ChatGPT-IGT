@@ -72,9 +72,6 @@ def plot_hc_posteriors(main_hc_sample, other_hc_samples, parameters=[("mu_a_rew"
     for i, (param_name, param_title) in enumerate(parameters):
         ax = axs[i // 2, i % 2]
 
-        # Plot for main dataframe
-        sns.kdeplot(main_hc_sample[param_name], ax=ax, fill=True, alpha=0.5, label="Main", color=main_color)
-
         # Plot for other dataframes
         for other_df in other_hc_samples:
             sns.kdeplot(other_df[param_name], ax=ax, fill=True, alpha=0.5, color=other_color, legend=False)
@@ -83,6 +80,9 @@ def plot_hc_posteriors(main_hc_sample, other_hc_samples, parameters=[("mu_a_rew"
         if show_priors and priors:
             prior_samples = priors[param_name](1000)
             sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5, label="Prior")
+        
+                # Plot for main dataframe
+        sns.kdeplot(main_hc_sample[param_name], ax=ax, fill=True, alpha=0.5, label="Selected Group", color=main_color)
 
         ax.set_title(param_title)
         ax.set_xlabel("Value")
@@ -166,6 +166,15 @@ def main():
 
     # plot posteriors
     plot_posteriors(hc_data_params, gpt_data_params, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_w_priors", show_priors=True)
+
+     # load all csv files in the extra_samples subfolder in results
+    hc_samples = []
+    for file in (data_path / "extra_samples").glob("*.csv"):
+        hc_samples.append(pd.read_csv(file))
+    
+    # plot posteriors
+    plot_hc_posteriors(hc_data_params, hc_samples, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_hc")
+
 
     # load posterior predictions data
     hc_data_pred = pd.read_csv(data_path / "pred_success_ahn_hc.csv")
