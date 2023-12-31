@@ -102,10 +102,12 @@ def savage_dickey_plot_outcome(data, parameters=[("alpha", "$\\alpha X$")], save
         # prior
         sns.kdeplot(prior_samples, ax=axs[0], color="black", linestyle="--")
         axs[0].set_title(f"Prior {name}")
+        axs[0].axvline(x=0, color="black", linestyle="-")
 
         # posterior
         sns.kdeplot(posterior_samples, ax=axs[1], color="red", linestyle="-")
         axs[1].set_title(f"Posterior {name}")
+        axs[1].axvline(x=0, color="black", linestyle="-")
 
         # combined
         sns.kdeplot(prior_samples, ax=axs[2], color="black", linestyle="--", label="Prior")
