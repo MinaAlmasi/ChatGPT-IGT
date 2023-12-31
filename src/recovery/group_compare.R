@@ -4,6 +4,8 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel)
 # set seed
 set.seed(2502)
 
+fixed_theta = TRUE
+
 # read json
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud

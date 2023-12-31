@@ -5,7 +5,7 @@ pacman::p_load(hesim, extraDistr, R2jags, parallel)
 set.seed(2502)
 
 # define whether theta is fixed or not
-fixed_theta <- FALSE
+fixed_theta <- TRUE
 
 # read json
 root_path <- "~/Desktop/dm-code" # personal comp
