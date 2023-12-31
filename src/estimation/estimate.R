@@ -4,11 +4,22 @@ pacman::p_load(R2jags, parallel)
 # set seed
 set.seed(2502)
 
-# read data
+# overview of all groups that can be run 
+groups <- c("gpt", "ahn_hc", "ahn_hc_1", "ahn_hc_2", "ahn_hc_3", "ahn_hc_4")
+
+### SECTION WHERE YOU CAN CHANGE THINGS ###
+# change the root path according to your needs (i.e., where the ChatGPT-IGT folder is located)
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
-group_name = "gpt"
-file <- file.path(root_path, "ChatGPT-IGT", "data", "final_data", paste0("clean_", group_name, ".csv"))
+
+# select group and read in data 
+group_name = groups[6] # group 1: gpt, group 2: ahn_hc, group 3: ahn_hc_1, group 4: ahn_hc_2, group 5: ahn_hc_3, group 6: ahn_hc_4
+
+### CODE ###
+# create and load file based on group selection
+file <- ifelse(grepl("^ahn_hc_", group_name), 
+               file.path(root_path, "ChatGPT-IGT", "data", "final_data", "extra_samples", paste0("clean_", group_name, ".csv")), 
+               file.path(root_path, "ChatGPT-IGT", "data", "final_data", paste0("clean_", group_name, ".csv")))
 data <- read.csv(file)
 
 # extract relevant variables
@@ -24,6 +35,8 @@ X <- array(0,c(nsubs,ntrials_max))
 ntrials <- array(0,c(nsubs))
 
 # turn data from long format into arrays with (nsubs x ntrials_max) dimensions
+
+print(paste0("Working on file: ", basename(file)))
 for (s in 1:nsubs) {
   
   #record n trials for subject s
@@ -71,8 +84,11 @@ mu_omega_p <- Y$mu_omega_p
 # save to df 
 df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
 
-# save df
-savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("param_estimated_", group_name, ".csv"))
+# save df (if it is an extra sample e.g., ahn_hc_3, then save to the "extra_samples" folder within results)
+ifelse(grepl("^ahn_hc_", group_name),
+        savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", "extra_samples", paste0("param_estimated_", group_name, ".csv")),
+        savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("param_estimated_", group_name, ".csv")))
+
 write.csv(df, savefile)
 
 # print time run
