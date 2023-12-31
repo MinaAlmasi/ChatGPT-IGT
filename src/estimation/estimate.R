@@ -84,8 +84,11 @@ mu_omega_p <- Y$mu_omega_p
 # save to df 
 df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
 
-# save df
-savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("param_estimated_", group_name, ".csv"))
+# save df (if it is an extra sample e.g., ahn_hc_3, then save to the "extra_samples" folder within results)
+ifelse(grepl("^ahn_hc_", group_name),
+        savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", "extra_samples", paste0("param_estimated_", group_name, ".csv")),
+        savefile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("param_estimated_", group_name, ".csv")))
+
 write.csv(df, savefile)
 
 # print time run
