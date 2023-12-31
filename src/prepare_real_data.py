@@ -3,6 +3,7 @@ Prepare AHN data
 '''
 import pathlib
 import pandas as pd
+import numpy as np
 
 def prepare_ahn(data_path, filename:str="healthy_control", save_path=None):
     '''
@@ -40,6 +41,64 @@ def prepare_ahn(data_path, filename:str="healthy_control", save_path=None):
         df.to_csv(save_path / f"clean_ahn_hc.csv", index=False)
 
     return df
+
+def create_ahn_extra_samples(data_path, n_samples=5, filename:str="healthy_control", save_path=None):
+    '''
+    Create n_samples extra samples for Ahn data with 30 subjects
+    '''
+    # check if filename is valid
+    valid_filenames = ["healthy_control", "amphetamine", "heroin"]
+
+    if filename not in valid_filenames:
+        raise ValueError(f"filename must be one of {valid_filenames}")
+
+    # load data
+    df = pd.read_csv(data_path / f"IGTdata_{filename}.txt", sep="\t")
+
+    # create outcoome column (note the sign: plus because losses are stored as negative)
+    df['X'] = df['gain'] + df['loss']
+
+    # group by subject id to see how many observatiions each subject has
+    count = df.groupby('subjID').count()
+
+    # rm all subjects that does not have 100 observations
+    count = count[count['trial'] == 100]
+
+    # filter with count
+    df = df[df['subjID'].isin(count.index)].reset_index(drop=True)
+
+    # randomly sample 30 subjects
+    subjects = df['subjID'].unique()
+
+    # create empty list to store dfs
+    dfs = []
+
+    # loop over subjects
+    for i in range(n_samples):
+        # sample 30 subjects
+        sample = np.random.choice(subjects, 30, replace=False)
+
+        # filter df with sample
+        df_sample = df[df['subjID'].isin(sample)].reset_index(drop=True)
+
+        # drop gain and loss
+        df_sample = df_sample.drop(columns=['gain', 'loss', 'trial'])
+
+        # rename columns
+        df_sample = df_sample.rename(columns={'deck':'x'})
+
+        # append to list
+        dfs.append(df_sample)
+    
+    # define path
+    final_path = save_path / "extra_samples"
+    final_path.mkdir(parents=True, exist_ok=True)
+
+    # save each dataframe 
+    for i, df in enumerate(dfs):
+        df.to_csv(final_path / f"clean_ahn_hc_{i+1}.csv", index=False)
+
+    return dfs
 
 def load_gpt(datapath):
     '''
@@ -99,8 +158,11 @@ def clean_gpt(gpt_df, save_path=None):
     
 
 def main(): 
+    # set seed
+    np.random.seed(2502)
+
     # define path
-    path = pathlib.Path(__file__).parents[2]
+    path = pathlib.Path(__file__).parents[1]
 
     # path to data 
     data_root = path / "data" / "raw_data"
@@ -116,6 +178,9 @@ def main():
 
     # translate gpt data
     df_gpt = clean_gpt(df_gpt, save_path=save_path)
+
+    # create extra samples for ahn data
+    create_ahn_extra_samples(data_path = data_root / "Ahn2014", n_samples=4, filename="healthy_control", save_path=save_path)
 
 if __name__ == "__main__":
     main()
