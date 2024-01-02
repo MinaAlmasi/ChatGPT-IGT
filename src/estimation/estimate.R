@@ -11,11 +11,11 @@ groups <- c("gpt", "ahn_hc", "ahn_hc_1", "ahn_hc_2", "ahn_hc_3", "ahn_hc_4")
 fixed_theta <- TRUE # if FALSE then theta is estimated (included in params and a different model file is used)
 
 # change the root path according to your needs (i.e., where the ChatGPT-IGT folder is located)
-root_path <- "~/Desktop/dm-code" # personal comp
-#root_path <- "dm-code" # UCloud
+#root_path <- "~/Desktop/dm-code" # personal comp
+root_path <- "dm-code" # UCloud
 
 # select group and read in data 
-group_name = groups[6] # group 1: gpt, group 2: ahn_hc, group 3: ahn_hc_1, group 4: ahn_hc_2, group 5: ahn_hc_3, group 6: ahn_hc_4
+group_name = groups[2] # group 1: gpt, group 2: ahn_hc, group 3: ahn_hc_1, group 4: ahn_hc_2, group 5: ahn_hc_3, group 6: ahn_hc_4
 
 ### CODE ###
 # create and load file based on group selection
@@ -94,10 +94,17 @@ mu_omega_f <- Y$mu_omega_f
 mu_omega_p <- Y$mu_omega_p
 
 # plot traceplots
-traceplot(samples$BUGSoutput)
+plotfile <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "plots", "traceplots", paste0("trace_", group_name, ".png"))
+png(plotfile, width = 2500, height = 2500, res = 400)
+traceplot(samples$BUGSoutput, ask=FALSE, mfrow = c(3, 2), varname=params)
+dev.off()
 
 # save to df 
-df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
+if (fixed_theta) {
+  df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_omega_f, mu_omega_p)
+} else {
+  df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
+}
 
 # save df (if it is an extra sample e.g., ahn_hc_3, then save to the "extra_samples" folder within results)
 ifelse(grepl("^ahn_hc_", group_name),
@@ -109,5 +116,3 @@ write.csv(df, savefile)
 # print time run
 end_time = Sys.time()
 print(end_time - start_time)
-
-
