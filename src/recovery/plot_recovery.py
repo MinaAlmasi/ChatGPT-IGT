@@ -145,12 +145,14 @@ def main():
     single_subj_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_single_subject.csv"
     single_subj_fixed_theta_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_single_subject_fixed_theta.csv"
     group_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL.csv"
+    group_fixed_theta_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL_fixed_theta.csv"
     comparison_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_comparisons.csv"
 
     # load recovered parameters
     subject_data = pd.read_csv(single_subj_path)
     subject_data_fixed_theta = pd.read_csv(single_subj_fixed_theta_path)
     group_data = pd.read_csv(group_path)
+    group_data_fixed_theta = pd.read_csv(group_fixed_theta_path)
     comparison_data = pd.read_csv(comparison_path)
 
     # plot subject recovery
@@ -167,7 +169,7 @@ def main():
 
     # plot subject recovery but for recovered parameters without theta
     subject_parameters_no_theta = [x for x in subject_parameters if x[0] != "true_theta"]
-    plot_recovery(subject_data_fixed_theta, parameters = subject_parameters_no_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject_no_theta.png")
+    plot_recovery(subject_data_fixed_theta, parameters = subject_parameters_no_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_single_subject_fixed_theta.png")
 
     # plot parameters for group recovery
     group_parameters = [
@@ -180,6 +182,12 @@ def main():
     ]
 
     plot_recovery(group_data, parameters = group_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group.png")
+
+    # plot parameters for group recovery but for recovered parameters without theta
+    group_parameters_no_theta = [x for x in group_parameters if x[0] != "true_mu_theta"]
+
+    plot_recovery(group_data_fixed_theta, parameters = group_parameters_no_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group_fixed_theta.png")
+
 
     # plot recovery for group comparisons
     comparison_parameters = [
