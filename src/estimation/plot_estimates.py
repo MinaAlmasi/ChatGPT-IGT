@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy.stats import truncnorm, gamma, binom
+import matplotlib.lines as mlines
 
 def chance_level(n, alpha = 0.001, p = 0.5):
     k = binom.ppf(1-alpha, n, p)
@@ -15,6 +16,7 @@ def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
     return truncnorm.rvs(a, b, loc=mean, scale=sd, size=size)
 
+
 def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], 
                     parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), 
                     ("mu_K", "$\mu K$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], 
@@ -25,6 +27,7 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
     # Define prior distributions only if show_priors is True
     priors = None
     if show_priors:
+        # Assume sample_truncated_normal and other necessary functions are defined
         priors = {
             "mu_a_rew": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
             "mu_a_pun": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
@@ -36,68 +39,89 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
     total_subplots = len(axs.flatten())
     for i, (param_name, param_title) in enumerate(parameters):
         ax = axs[i // 2, i % 2]
-        sns.kdeplot(hc_data[param_name], ax=ax, fill=True, alpha=0.5, label="HC", color=colors[0])
-        sns.kdeplot(gpt_data[param_name], ax=ax, fill=True, alpha=0.5, label="ChatGPT", color=colors[1])
+        sns.kdeplot(hc_data[param_name], ax=ax, fill=True, alpha=0.5, color=colors[0])
+        sns.kdeplot(gpt_data[param_name], ax=ax, fill=True, alpha=0.5, color=colors[1])
 
-        # Plot prior if show_priors is True
         if show_priors and priors:
             prior_samples = priors[param_name](1000)
-            sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5, label="Prior")
+            sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5)
 
         ax.set_title(param_title)
         ax.set_xlabel("Value")
         ax.set_ylabel("Density")
-        ax.legend()
 
-    # Hide the last subplot if the number of parameters is less than the total subplots
+    # Create a single legend at the top of the figure
+    labels = ["HC", "ChatGPT"]
+    if show_priors:
+        labels.append("Prior")
+    fig.legend(labels, loc='upper center', ncol=len(labels), bbox_to_anchor=(0.5, 0.95), fancybox=True)
+
+    # Hide the last subplot if the number of parameters is less than total subplots
     if len(parameters) < total_subplots:
         axs[-1, -1].axis('off')
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
 
-def plot_hc_posteriors(main_hc_sample, other_hc_samples, parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), ("mu_K", "$\mu K$"), ("mu_theta","$\mu \\theta$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], save_path=None, show_priors=False):
+
+def plot_hc_posteriors(main_hc_sample, other_hc_samples, 
+                       parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), 
+                                   ("mu_K", "$\mu K$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], 
+                       save_path=None, show_priors=False):
     fig, axs = plt.subplots(3, 2, figsize=(10, 10))
     plt.subplots_adjust(hspace=0.5)
 
-    # Define colors
     main_color = "#398A20"  # Green for the main dataframe
     other_color = "#D3D3D3"  # Light grey for other dataframes
 
-    # Define prior distributions only if show_priors is True
     priors = None
     if show_priors:
+        # Assume sample_truncated_normal and other necessary functions are defined
         priors = {
             "mu_a_rew": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
             "mu_a_pun": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
             "mu_K": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
-            "mu_theta": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
-            "mu_omega_f": lambda size: np.random.normal(0, 1, size),
-            "mu_omega_p": lambda size: np.random.normal(0, 1, size)
+            "mu_omega_f": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size),
+            "mu_omega_p": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size)
         }
 
+    total_parameters = len(parameters)
     for i, (param_name, param_title) in enumerate(parameters):
         ax = axs[i // 2, i % 2]
 
-        # Plot for other dataframes
         for other_df in other_hc_samples:
-            sns.kdeplot(other_df[param_name], ax=ax, fill=True, alpha=0.5, color=other_color, legend=False)
+            sns.kdeplot(other_df[param_name], ax=ax, fill=True, alpha=0.5, color=other_color)
 
-        # Plot prior if show_priors is True
         if show_priors and priors:
             prior_samples = priors[param_name](1000)
-            sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5, label="Prior")
-        
-                # Plot for main dataframe
-        sns.kdeplot(main_hc_sample[param_name], ax=ax, fill=True, alpha=0.5, label="Selected Group", color=main_color)
+            sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5)
+
+        sns.kdeplot(main_hc_sample[param_name], ax=ax, fill=True, alpha=0.5, color=main_color)
 
         ax.set_title(param_title)
         ax.set_xlabel("Value")
         ax.set_ylabel("Density")
-        ax.legend()
+
+    # Hide the last subplot if the number of parameters is odd
+    if total_parameters % 2 != 0:
+        axs[-1, -1].axis('off')
+
+    # Manually create legend entries
+    selected_sample_line = mlines.Line2D([], [], color=main_color, label='Selected Sample', linestyle='-', linewidth=2)
+    other_samples_line = mlines.Line2D([], [], color=other_color, label='Other Samples', linestyle='-', linewidth=2)
+    prior_line = mlines.Line2D([], [], color='k', label='Prior', linestyle='--', linewidth=2)
+
+    legend_handles = [selected_sample_line, other_samples_line]
+    if show_priors:
+        legend_handles.append(prior_line)
+
+    # Create a single legend for the entire figure
+    fig.legend(handles=legend_handles, loc='upper center', ncol=3, bbox_to_anchor=(0.5, 0.95), fancybox=True)
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
+
+
 
 
 def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C", "#3C5299"], save_path=None):
@@ -180,8 +204,7 @@ def main():
         hc_samples.append(pd.read_csv(file))
     
     # plot posteriors
-    #plot_hc_posteriors(hc_data_params, hc_samples, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_hc")
-
+    plot_hc_posteriors(hc_data_params, hc_samples, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_hc")
 
     # load posterior predictions data
     hc_data_pred = pd.read_csv(data_path / "pred_success_ahn_hc.csv")
