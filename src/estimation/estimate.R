@@ -8,6 +8,8 @@ set.seed(2502)
 groups <- c("gpt", "ahn_hc", "ahn_hc_1", "ahn_hc_2", "ahn_hc_3", "ahn_hc_4")
 
 ### SECTION WHERE YOU CAN CHANGE THINGS ###
+fixed_theta <- TRUE # if FALSE then theta is estimated (included in params and a different model file is used)
+
 # change the root path according to your needs (i.e., where the ChatGPT-IGT folder is located)
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
@@ -56,8 +58,13 @@ X <- X/100
 
 # set up jags and run jags model
 jags_data <- list("x","X","ntrials","nsubs") 
-params<-c("mu_a_rew","mu_a_pun","mu_K","mu_theta","mu_omega_f","mu_omega_p") 
-model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL.txt")
+if (fixed_theta) {
+  params<-c("mu_a_rew","mu_a_pun","mu_K","mu_omega_f","mu_omega_p") 
+  model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL_fixed_theta.txt")
+} else {
+  params<-c("mu_a_rew","mu_a_pun","mu_K","mu_theta","mu_omega_f","mu_omega_p") 
+  model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL.txt")
+}
 
 # set timer
 start_time = Sys.time()
@@ -80,6 +87,9 @@ mu_K <- Y$mu_K
 mu_theta <- Y$mu_theta
 mu_omega_f <- Y$mu_omega_f
 mu_omega_p <- Y$mu_omega_p
+
+# plot traceplots
+traceplot(samples$BUGSoutput)
 
 # save to df 
 df <- data.frame(mu_a_rew, mu_a_pun, mu_K, mu_theta, mu_omega_f, mu_omega_p)
