@@ -147,6 +147,7 @@ def main():
     group_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL.csv"
     group_fixed_theta_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_ALL_fixed_theta.csv"
     comparison_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_comparisons.csv"
+    comparison_fixed_theta_path = path.parents[2] / "src" / "recovery" / "results" / "param_recovery_group_comparisons_fixed_theta.csv"
 
     # load recovered parameters
     subject_data = pd.read_csv(single_subj_path)
@@ -154,6 +155,7 @@ def main():
     group_data = pd.read_csv(group_path)
     group_data_fixed_theta = pd.read_csv(group_fixed_theta_path)
     comparison_data = pd.read_csv(comparison_path)
+    comparison_data_fixed_theta = pd.read_csv(comparison_fixed_theta_path)
 
     # plot subject recovery
     subject_parameters = [
@@ -200,6 +202,11 @@ def main():
     ]
 
     plot_recovery(comparison_data, parameters = comparison_parameters, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group_comparison.png")
+
+    # plot recovery for group comparisons but for recovered parameters without theta
+    comparison_parameters_no_theta = [x for x in comparison_parameters if x[0] != "true_alpha_theta"]
+
+    plot_recovery(comparison_data_fixed_theta, parameters = comparison_parameters_no_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group_comparison_fixed_theta.png")
 
     # load actual parameters
     true_parameter_data = pd.read_json(path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data.json") 
