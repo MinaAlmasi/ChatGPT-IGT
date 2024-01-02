@@ -77,7 +77,12 @@ samples <- jags.parallel(jags_data, inits=NULL, params,
 
 print(samples$BUGSoutput)
 
-write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("summary_param_estimated_", group_name, ".txt")))
+# save summary to txt file depending on group
+ifelse(grepl("^ahn_hc_", group_name),
+        summary_file <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", "extra_samples", paste0("summary_param_estimated_", group_name, ".txt")),
+        summary_file <- file.path(root_path, "ChatGPT-IGT", "src", "estimation", "results", paste0("summary_param_estimated_", group_name, ".txt")))
+
+write.table(samples$BUGSoutput$summary, summary_file)
 
 # extact mu parameters
 Y <- samples$BUGSoutput$sims.list
