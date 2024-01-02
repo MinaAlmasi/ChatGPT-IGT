@@ -15,7 +15,7 @@ def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
     return truncnorm.rvs(a, b, loc=mean, scale=sd, size=size)
 
-def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), ("mu_K", "$\mu K$"), ("mu_theta","$\mu \\theta$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], save_path=None, show_priors=False):
+def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), ("mu_K", "$\mu K$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], save_path=None, show_priors=False):
     fig, axs = plt.subplots(3, 2, figsize=(10, 10))
     plt.subplots_adjust(hspace=0.5)
 
@@ -26,9 +26,8 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters
             "mu_a_rew": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
             "mu_a_pun": lambda size: sample_truncated_normal(0, 1, 0, 1, size),
             "mu_K": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
-            "mu_theta": lambda size: sample_truncated_normal(0, 1, 0, np.inf, size),
-            "mu_omega_f": lambda size: np.random.normal(0, 1, size),
-            "mu_omega_p": lambda size: np.random.normal(0, 1, size)
+            "mu_omega_f": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size),
+            "mu_omega_p": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size)
         }
 
     for i, (param_name, param_title) in enumerate(parameters):
