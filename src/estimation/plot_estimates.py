@@ -15,7 +15,10 @@ def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
     return truncnorm.rvs(a, b, loc=mean, scale=sd, size=size)
 
-def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), ("mu_K", "$\mu K$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], save_path=None, show_priors=False):
+def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], 
+                    parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), 
+                    ("mu_K", "$\mu K$"), ("mu_omega_f","$\mu \omega_F$"), ("mu_omega_p", "$\mu \omega_P$")], 
+                    save_path=None, show_priors=False):
     fig, axs = plt.subplots(3, 2, figsize=(10, 10))
     plt.subplots_adjust(hspace=0.5)
 
@@ -30,6 +33,7 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters
             "mu_omega_p": lambda size: np.random.normal(0, 1/np.sqrt(0.1), size)
         }
 
+    total_subplots = len(axs.flatten())
     for i, (param_name, param_title) in enumerate(parameters):
         ax = axs[i // 2, i % 2]
         sns.kdeplot(hc_data[param_name], ax=ax, fill=True, alpha=0.5, label="HC", color=colors[0])
@@ -44,6 +48,10 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"], parameters
         ax.set_xlabel("Value")
         ax.set_ylabel("Density")
         ax.legend()
+
+    # Hide the last subplot if the number of parameters is less than the total subplots
+    if len(parameters) < total_subplots:
+        axs[-1, -1].axis('off')
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
@@ -172,7 +180,7 @@ def main():
         hc_samples.append(pd.read_csv(file))
     
     # plot posteriors
-    plot_hc_posteriors(hc_data_params, hc_samples, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_hc")
+    #plot_hc_posteriors(hc_data_params, hc_samples, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_hc")
 
 
     # load posterior predictions data
