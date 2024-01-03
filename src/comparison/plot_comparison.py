@@ -15,25 +15,32 @@ def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
     return truncnorm.rvs(a, b, loc=mean, scale=sd, size=size)
 
-def savage_dickey_plot_orl(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"), ("alpha_a_pun", "$\\alpha A_{pun}$"), ("alpha_K", "$\\alpha K$"), ("alpha_theta","$\\alpha \\theta$"), ("alpha_omega_f","$\\alpha \omega_F$"), ("alpha_omega_p", "$\\alpha \omega_P$")], save_path=None):
-    # initialize plot
-    fig, ax = plt.subplots(2, 3, figsize=(15, 10))
+def savage_dickey_plot_orl(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"), ("alpha_a_pun", "$\\alpha A_{pun}$"), ("alpha_K", "$\\alpha K$"), ("alpha_omega_f","$\\alpha \omega_F$"), ("alpha_omega_p", "$\\alpha \omega_P$")], save_path=None):
+    '''
+    Plot the prior and posterior distributions of the parameters of the ORL model. Note that theta is not included as it is not estimated.
+    '''
+    # determine num of rows and cols 
+    num_params = len(parameters)
+    num_cols = 3
+    num_rows = num_params // num_cols + (num_params % num_cols > 0)
+
+    # define plot
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 10))
+    if num_rows > 1:  # If more than one row, flatten the axes array
+        axes = axes.flatten()
 
     # define priors
     priors = {
         "alpha_a_rew": lambda size: sample_truncated_normal(0, 1, -1, 1, size),
         "alpha_a_pun": lambda size: sample_truncated_normal(0, 1, -1, 1, size),
         "alpha_K": lambda size: np.random.normal(0, 1, size),
-        "alpha_theta": lambda size: np.random.normal(0, 1, size),
         "alpha_omega_f": lambda size: np.random.normal(0, 1, size),
         "alpha_omega_p": lambda size: np.random.normal(0, 1, size)
-        # Add other priors if necessary
     }
 
-    # loop over parameters and plot
+    # loop over params
     for i, (param, name) in enumerate(parameters):
-        # define axes
-        x = ax[i//3, i%3]
+        ax = axes[i] if num_rows > 1 else axes
 
         # generate prior and posterior samples
         prior_samples = priors[param](1000)
@@ -43,34 +50,39 @@ def savage_dickey_plot_orl(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"
         prior_kde = gaussian_kde(prior_samples)
         posterior_kde = gaussian_kde(posterior_samples)
 
-        # calculate densities at the critical value 0
+        # compute densities at the critical value 0
         prior_density_at_0 = prior_kde(0)
         posterior_density_at_0 = posterior_kde(0)
 
-        # calculate Savage-Dickey density ratio (increasing the belief that there is no difference or effect)
+        # compute Savage-Dickey density ratio
         BF = prior_density_at_0 / posterior_density_at_0
 
         # plot prior and posterior
-        sns.kdeplot(prior_samples, ax=x, color="black", linestyle="--", label="Prior")
-        sns.kdeplot(posterior_samples, ax=x, color="red", linestyle="-", label="Posterior")
+        sns.kdeplot(prior_samples, ax=ax, color="black", linestyle="--", label="Prior")
+        sns.kdeplot(posterior_samples, ax=ax, color="red", linestyle="-", label="Posterior")
 
-        # set title
-        x.set_title(name)
+        # set title and labels
+        ax.set_title(name)
+        ax.set_xlabel("")
 
-        # only add legend to plot number 3
-        if i == 2:
-            x.legend()
-        
-        # rm x-label
-        x.set_xlabel("")
+        # write Savage-Dickey in plot
+        ax.text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=ax.transAxes, verticalalignment='top')
 
-        # annotate Savage-Dickey density ratio
-        x.text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=x.transAxes, verticalalignment='top')
+        # only add legend to the first plot
+        if i == 0:
+            ax.legend()
 
-    # save plot if a path is provided
+    # rm empty subplots if the number of parameters is less than the number of subplots
+    for j in range(num_params, num_rows * num_cols):
+        if num_rows > 1:
+            fig.delaxes(axes[j])
+        else:
+            fig.delaxes(axes)
+
+    # adjust layout and save plot if a path is provided
+    plt.tight_layout()
     if save_path is not None:
         plt.savefig(save_path)
-
 
 def savage_dickey_plot_outcome(data, parameters=[("alpha", "$\\alpha X$")], save_path=None):
     # Define a figure with three subplots
