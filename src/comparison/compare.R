@@ -4,6 +4,9 @@ pacman::p_load(R2jags, parallel)
 # set seed
 set.seed(2502)
 
+# set theta
+fixed_theta <- TRUE # if FALSE then theta is estimated (included in params and a different model file is used)
+
 # read data
 root_path <- "~/Desktop/dm-code" # personal comp
 #root_path <- "dm-code" # UCloud
