@@ -34,11 +34,18 @@ start_iteration = Sys.time()
 
 # setup jags 
 jags_data <- list("x_grp1", "X_grp1", "x_grp2", "X_grp2", "ntrials", "nsubs")
-params<-c("alpha_a_rew","alpha_a_pun","alpha_K","alpha_omega_f","alpha_omega_p", "alpha_theta")
+
+if (fixed_theta) {
+    params<-c("alpha_a_rew","alpha_a_pun","alpha_K","alpha_omega_f","alpha_omega_p")
+    model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL_compare_fixed_theta.txt")
+} else {
+    params<-c("alpha_a_rew","alpha_a_pun","alpha_K","alpha_omega_f","alpha_omega_p", "alpha_theta")
+    model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL_compare.txt")
+}
+
 
 # run jags
 print("Intializing JAGS ...")
-model_file <- file.path(root_path, "ChatGPT-IGT", "models", "hier_ORL_compare.txt")
 samples <- jags.parallel(jags_data, inits=NULL, params,
                 model.file =model_file,
                 n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=4)
@@ -63,7 +70,10 @@ run_iteration <- round(end_iteration - start_iteration, 2)
 print(paste0("Iteration time: ", run_iteration, " minutes"))
 
 # make dataframe
-df = data.frame(alpha_a_rew, alpha_a_pun, alpha_K, alpha_theta, alpha_omega_f, alpha_omega_p)
-
+if (fixed_theta) {
+   df = data.frame(alpha_a_rew, alpha_a_pun, alpha_K, alpha_omega_f, alpha_omega_p)
+} else {
+    df = data.frame(alpha_a_rew, alpha_a_pun, alpha_K, alpha_theta, alpha_omega_f, alpha_omega_p)
+}
 # save df
 write.csv(df, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "alpha_params_comparison.csv"))
