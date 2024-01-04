@@ -24,8 +24,6 @@ def calculate_deck_switches(data):
     # disregard trial one
     deck_switch_prop = deck_switch_prop[deck_switch_prop['trial'] != 1]
 
-    # average for every 10 trials
-
     return deck_switch_prop
 
 def plot_deck_switch_with_confidence(data1, data2, labels, window_size=10, save_path=None):
@@ -65,7 +63,7 @@ def plot_deck_switch_with_confidence(data1, data2, labels, window_size=10, save_
 
     # Add labels and custom legend
     ax.set_xlabel("Trial")
-    ax.set_ylabel("Average Deck Switches at Trial")
+    ax.set_ylabel("Proportion of Deck Switches at Trial")
     ax.legend(handles=lines, labels=labels)
 
     # save the plot
