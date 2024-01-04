@@ -7,6 +7,16 @@ import numpy as np
 import pandas as pd
 import re
 from scipy.stats import binom
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontManager
+
+def set_font():
+    available_fonts = set(f.name for f in FontManager().ttflist)
+    if 'Times New Roman' in available_fonts:
+        # use times new roman if available
+        plt.rcParams['font.family'] = 'Times New Roman'
+        # set font size to 13
+        plt.rcParams.update({'font.size': 13})
 
 def chance_level(n, alpha = 0.001, p = 0.5):
     k = binom.ppf(1-alpha, n, p)
@@ -156,6 +166,9 @@ def main():
     group_data_fixed_theta = pd.read_csv(group_fixed_theta_path)
     comparison_data = pd.read_csv(comparison_path)
     comparison_data_fixed_theta = pd.read_csv(comparison_fixed_theta_path)
+
+    # set global font to Times if it is available
+    set_font()
 
     # plot subject recovery
     subject_parameters = [
