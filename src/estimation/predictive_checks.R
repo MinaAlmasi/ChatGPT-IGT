@@ -4,6 +4,9 @@ pacman::p_load(R2jags, parallel)
 # set seed
 set.seed(2502)
 
+# fix theta or not
+fixed_theta <- TRUE
+
 # defining a function for calculating the maximum of the posterior density (not exactly the same as the mode)
 MPD <- function(x) {density(x)$x[which(density(x)$y==max(density(x)$y))]}
 
@@ -33,9 +36,17 @@ for (s in 1:nsubs) {
   ntrials <- 100
   
   # set up jags and run jags model on one subject
-  data <- list("x","X","ntrials") 
-  params<-c("a_rew","a_pun","K","theta","omega_f","omega_p","p")
-  model_file <- file.path(root_path, "ChatGPT-IGT", "models", "ORL.txt")
+  data <- list("x","X","ntrials")
+
+
+  if (fixed_theta) {  
+    params<-c("a_rew","a_pun","K","omega_f","omega_p","p")
+    model_file <- file.path(root_path, "ChatGPT-IGT", "models", "ORL_fixed_theta.txt")
+  } else {
+    params<-c("a_rew","a_pun","K","theta","omega_f","omega_p","p")
+    model_file <- file.path(root_path, "ChatGPT-IGT", "models", "ORL.txt")
+  }
+
   temp_samples <- jags.parallel(data, inits=NULL, params,
                                 model.file =model_file,
                                 n.chains=3, n.iter=3000, n.burnin=1000, n.thin=1, n.cluster=3)
