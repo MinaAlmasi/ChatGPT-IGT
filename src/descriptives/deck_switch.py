@@ -38,9 +38,6 @@ def plot_deck_switch_with_confidence(data1, data2, labels, window_size=10, save_
     # Create a plot
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Set font
-    set_font()
-
     # Define colors
     colors = ["#52993C", "#3C5299"]
     alpha = 0.3  # Transparency for confidence interval
@@ -93,6 +90,9 @@ def main():
     # calculate deck switches for both datasets
     hc_deck_switch_prop = calculate_deck_switches(hc_data)
     gpt_deck_switch_prop = calculate_deck_switches(gpt_data)
+
+    # Set font
+    set_font()
 
     # plot deck switches for both datasets
     plot_deck_switch_with_confidence(hc_deck_switch_prop, gpt_deck_switch_prop, ["Humans", "ChatGPT"], save_path=path.parents[2] / "src" / "descriptives" / "plots" / "deck_switches.png")

@@ -39,9 +39,6 @@ def plot_deck_preferences(data1, data2, labels, window_size=10, save_path=None):
     # add space between subplots
     fig.subplots_adjust(hspace=0.3)
 
-    # set font
-    set_font()
-
     # Define colors for all four decks
     colors = ["#F59B8C", "#B43622", "#A1E780", "#3CA50A"]
 
@@ -111,6 +108,9 @@ def main():
     # calculate deck preferences
     hc_deck_preferences = calculate_deck_preferences(hc_data)
     gpt_deck_preferences = calculate_deck_preferences(gpt_data)
+
+    # set font
+    set_font()
 
     # plot deck preferences
     plot_deck_preferences(hc_deck_preferences, gpt_deck_preferences, labels=['Humans', 'ChatGPT'], save_path=path.parents[2] / "src" / "descriptives" / "plots" / "deck_preferences.png")
