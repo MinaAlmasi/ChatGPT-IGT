@@ -5,6 +5,15 @@ import pandas as pd
 import re
 from scipy.stats import binom
 from matplotlib.lines import Line2D
+from matplotlib.font_manager import FontManager
+
+def set_font():
+    available_fonts = set(f.name for f in FontManager().ttflist)
+    if 'Times New Roman' in available_fonts:
+        # use times new roman if available
+        plt.rcParams['font.family'] = 'Times New Roman'
+        # set font size to 13
+        plt.rcParams.update({'font.size': 12})
 
 def calculate_deck_preferences(data):
     # create a new column that indicates the trial number
@@ -29,6 +38,9 @@ def plot_deck_preferences(data1, data2, labels, window_size=10, save_path=None):
 
     # add space between subplots
     fig.subplots_adjust(hspace=0.3)
+
+    # set font
+    set_font()
 
     # Define colors for all four decks
     colors = ["#F59B8C", "#B43622", "#A1E780", "#3CA50A"]

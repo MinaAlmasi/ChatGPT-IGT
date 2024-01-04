@@ -2,8 +2,16 @@ import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import re
-from scipy.stats import binom
+from matplotlib.lines import Line2D
+from matplotlib.font_manager import FontManager
+
+def set_font():
+    available_fonts = set(f.name for f in FontManager().ttflist)
+    if 'Times New Roman' in available_fonts:
+        # use times new roman if available
+        plt.rcParams['font.family'] = 'Times New Roman'
+        # set font size to 13
+        plt.rcParams.update({'font.size': 13})
 
 def calculate_deck_switches(data):
     # create a new column that indicates the trial number
@@ -29,6 +37,9 @@ def calculate_deck_switches(data):
 def plot_deck_switch_with_confidence(data1, data2, labels, window_size=10, save_path=None):
     # Create a plot
     fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Set font
+    set_font()
 
     # Define colors
     colors = ["#52993C", "#3C5299"]
