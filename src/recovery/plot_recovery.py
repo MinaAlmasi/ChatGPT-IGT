@@ -209,11 +209,17 @@ def main():
     plot_recovery(comparison_data_fixed_theta, parameters = comparison_parameters_no_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "param_recovery_group_comparison_fixed_theta.png")
 
     # load actual parameters
-    true_parameter_data = pd.read_json(path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data.json") 
+    true_parameter_data = pd.read_json(path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data.json")
+    true_parameter_data_fixed_theta = pd.read_json(path.parents[2] / "src" / "recovery" / "simulated_data" / "simulated_single_subject_data_fixed_theta.json")
 
     # run descriptive adequacy
     desc_ada_data = preprocess_descriptive_adaquacy(true_parameter_data, subject_data)
     plot_descriptive_adequacy(desc_ada_data, save_path = path.parents[2] / "src" / "recovery" / "plots" / "descriptive_adequacy.png")
+
+    # run descriptive adequacy but for recovered parameters without theta
+    desc_ada_data_fixed_theta = preprocess_descriptive_adaquacy(true_parameter_data_fixed_theta, subject_data_fixed_theta)
+    plot_descriptive_adequacy(desc_ada_data_fixed_theta, save_path = path.parents[2] / "src" / "recovery" / "plots" / "descriptive_adequacy_fixed_theta.png")
+
 
 
 if __name__ == "__main__":
