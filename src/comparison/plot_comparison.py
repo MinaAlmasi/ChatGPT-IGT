@@ -4,12 +4,21 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy.stats import truncnorm, gamma, binom, gaussian_kde
+from matplotlib.font_manager import FontManager
 
 def chance_level(n, alpha = 0.001, p = 0.5):
     k = binom.ppf(1-alpha, n, p)
     chance_level = k/n
     
     return chance_level
+
+def set_font():
+    available_fonts = set(f.name for f in FontManager().ttflist)
+    if 'Times New Roman' in available_fonts:
+        # use times new roman if available
+        plt.rcParams['font.family'] = 'Times New Roman'
+        # set font size to 13
+        plt.rcParams.update({'font.size': 13})
 
 def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
@@ -148,6 +157,9 @@ def main():
 
     # load outcome data
     outcome_comparison_data = pd.read_csv(data_path / "outcome_params.csv")
+    
+    # set font
+    set_font()
 
     # plot
     savage_dickey_plot_orl(orl_comparison_data, save_path=path.parents[2] / "src" / "comparison" / "plots" / "alpha_comparison_orl.png")
