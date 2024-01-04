@@ -84,7 +84,7 @@ def main():
     gpt_deck_switch_prop = calculate_deck_switches(gpt_data)
 
     # plot deck switches for both datasets
-    plot_deck_switch_with_confidence(hc_deck_switch_prop, gpt_deck_switch_prop, ["HC", "ChatGPT"], save_path=path.parents[2] / "src" / "descriptives" / "plots" / "deck_switches.png")
+    plot_deck_switch_with_confidence(hc_deck_switch_prop, gpt_deck_switch_prop, ["Humans", "ChatGPT"], save_path=path.parents[2] / "src" / "descriptives" / "plots" / "deck_switches.png")
 
 
     print(hc_deck_switch_prop)

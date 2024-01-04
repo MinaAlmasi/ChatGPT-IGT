@@ -51,7 +51,7 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
         ax.set_ylabel("Density")
 
     # Create a single legend at the top of the figure
-    labels = ["HC", "ChatGPT"]
+    labels = ["Humans", "ChatGPT"]
     if show_priors:
         labels.append("Prior")
     fig.legend(labels, loc='upper center', ncol=len(labels), bbox_to_anchor=(0.5, 0.95), fancybox=True)
@@ -122,8 +122,6 @@ def plot_hc_posteriors(main_hc_sample, other_hc_samples,
         plt.savefig(save_path, dpi=300)
 
 
-
-
 def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C", "#3C5299"], save_path=None):
     '''
     Plot the descriptive adequacy of the model.
@@ -138,7 +136,7 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     '''
     # combine the two dataframes and create an indicator variable for group
     df = pd.concat([hc_data, gpt_data], ignore_index=True)
-    df['group'] = ['HC'] * len(hc_data) + ['ChatGPT'] * len(gpt_data)
+    df['group'] = ['Humans'] * len(hc_data) + ['ChatGPT'] * len(gpt_data)
 
     # divide pred success by 100 to get percentage
     df['pred_success'] = df['pred_success'] / 100
@@ -153,7 +151,7 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     sns.barplot(x=df.index, y=df['pred_success'], hue=df['group'], ax=ax, palette=[colors[1], colors[0]])
 
     # Calculate mean accuracies
-    hc_mean = df[df['group'] == 'HC']['pred_success'].mean()
+    hc_mean = df[df['group'] == 'Humans']['pred_success'].mean()
     gpt_mean = df[df['group'] == 'ChatGPT']['pred_success'].mean()
 
     # Add mean accuracy lines for each group
@@ -177,7 +175,7 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     handles.extend([plt.Line2D([], [], color=colors[1], linestyle='-'),
                     plt.Line2D([], [], color=colors[0], linestyle='-'),
                     plt.Line2D([], [], color='black', linestyle='--')])
-    labels.extend(['ChatGPT (Mean)', 'HC (Mean)', 'Chance Level'])
+    labels.extend(['ChatGPT (Mean)', 'Humans (Mean)', 'Chance Level'])
     ax.legend(handles, labels, loc='upper right')
 
     # Save the plot if a save path is provided

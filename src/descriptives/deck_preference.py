@@ -86,13 +86,6 @@ def plot_deck_preferences(data1, data2, labels, window_size=10, save_path=None):
     if save_path is not None:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
-    # show the plot
-    plt.show()
-
-
-
-
-
 
 def main():
     # define paths
@@ -108,7 +101,7 @@ def main():
     gpt_deck_preferences = calculate_deck_preferences(gpt_data)
 
     # plot deck preferences
-    plot_deck_preferences(hc_deck_preferences, gpt_deck_preferences, labels=['HC', 'ChatGPT'], save_path=path.parents[2] / "src" / "descriptives" / "plots" / "deck_preferences.png")
+    plot_deck_preferences(hc_deck_preferences, gpt_deck_preferences, labels=['Humans', 'ChatGPT'], save_path=path.parents[2] / "src" / "descriptives" / "plots" / "deck_preferences.png")
 
 
 
