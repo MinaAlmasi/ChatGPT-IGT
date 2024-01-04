@@ -5,6 +5,15 @@ import pandas as pd
 import seaborn as sns
 from scipy.stats import truncnorm, gamma, binom
 import matplotlib.lines as mlines
+from matplotlib.font_manager import FontManager
+
+def set_font():
+    available_fonts = set(f.name for f in FontManager().ttflist)
+    if 'Times New Roman' in available_fonts:
+        # use times new roman if available
+        plt.rcParams['font.family'] = 'Times New Roman'
+        # set font size to 13
+        plt.rcParams.update({'font.size': 13})
 
 def chance_level(n, alpha = 0.001, p = 0.5):
     k = binom.ppf(1-alpha, n, p)
@@ -54,7 +63,7 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
     labels = ["Humans", "ChatGPT"]
     if show_priors:
         labels.append("Prior")
-    fig.legend(labels, loc='upper center', ncol=len(labels), bbox_to_anchor=(0.5, 0.95), fancybox=True)
+    fig.legend(labels, loc='upper center', ncol=len(labels), bbox_to_anchor=(0.5, 0.98), fancybox=True)
 
     # Hide the last subplot if the number of parameters is less than total subplots
     if len(parameters) < total_subplots:
@@ -116,7 +125,7 @@ def plot_hc_posteriors(main_hc_sample, other_hc_samples,
         legend_handles.append(prior_line)
 
     # Create a single legend for the entire figure
-    fig.legend(handles=legend_handles, loc='upper center', ncol=3, bbox_to_anchor=(0.5, 0.95), fancybox=True)
+    fig.legend(handles=legend_handles, loc='upper center', ncol=3, bbox_to_anchor=(0.5, 0.98), fancybox=True)
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
@@ -192,6 +201,9 @@ def main():
     # load parameter estimation data
     hc_data_params = pd.read_csv(data_path / "param_estimated_ahn_hc.csv")
     gpt_data_params = pd.read_csv(data_path / "param_estimated_gpt.csv")
+
+    # set global font to times if available
+    set_font()
 
     # plot posteriors
     plot_posteriors(hc_data_params, gpt_data_params, save_path=path.parents[2] / "src" / "estimation" / "plots" / "posterior_compare_w_priors", show_priors=True)
