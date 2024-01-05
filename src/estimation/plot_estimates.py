@@ -69,9 +69,6 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
     if len(parameters) < total_subplots:
         axs[-1, -1].axis('off')
 
-    if save_path is not None:
-        plt.savefig(save_path, dpi=300)
-
 
 def plot_hc_posteriors(main_hc_sample, other_hc_samples, 
                        parameters=[("mu_a_rew", "$\mu A_{rew}$"), ("mu_a_pun", "$\mu A_{pun}$"), 
@@ -153,19 +150,22 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     # Set subplot
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    # sort bar chart by accuracy descending
-    df = df.sort_values(by=['pred_success'], ascending=False).reset_index(drop=True)
-
     # Create bar plot with each subject (row) on the x-axis and the accuracy on the y-axis and colored by group
-    sns.barplot(x=df.index, y=df['pred_success'], hue=df['group'], ax=ax, palette=[colors[1], colors[0]])
+    sns.barplot(x=df.index, y=df['pred_success'], hue=df['group'], ax=ax, palette=[colors[0], colors[1]])
 
     # Calculate mean accuracies
     hc_mean = df[df['group'] == 'Humans']['pred_success'].mean()
     gpt_mean = df[df['group'] == 'ChatGPT']['pred_success'].mean()
 
-    # Add mean accuracy lines for each group
-    ax.axhline(y=hc_mean, linestyle='-', color=colors[0])
-    ax.axhline(y=gpt_mean, linestyle='-', color=colors[1])
+    # Calculate the mid-point between the two groups on the x-axis
+    mid_point = len(hc_data) - 0.5
+
+    # set a darker version of the colors for the mean spans
+    colors_dark = ["#1a6403", "#011554"]
+
+    # Add mean accuracy spans for each group
+    ax.axhspan(hc_mean-0.002, hc_mean+0.002, xmin=0, xmax=mid_point/(len(df.index) - 1.2), color=colors_dark[0], alpha=1)
+    ax.axhspan(gpt_mean-0.002, gpt_mean+0.002, xmin=mid_point/(len(df.index) - 1.2), xmax=1, color=colors_dark[1], alpha=1)
 
     # Add a dotted line for chance level at 25%
     ax.axhline(y=0.25, linestyle='--', color='black')
@@ -181,15 +181,17 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
 
     # Create custom legend
     handles, labels = ax.get_legend_handles_labels()
-    handles.extend([plt.Line2D([], [], color=colors[1], linestyle='-'),
-                    plt.Line2D([], [], color=colors[0], linestyle='-'),
+    handles.extend([plt.Line2D([], [], color=colors_dark[0], linestyle='-'),
+                    plt.Line2D([], [], color=colors_dark[1], linestyle='-'),
                     plt.Line2D([], [], color='black', linestyle='--')])
-    labels.extend(['ChatGPT (Mean)', 'Humans (Mean)', 'Chance Level'])
-    ax.legend(handles, labels, loc='upper right')
+    labels.extend(['Humans (Mean)', 'ChatGPT (Mean)', 'Chance Level'])
+    ax.legend(handles, labels, loc='upper center', ncol=3, bbox_to_anchor=(0.5, 1.1), fancybox=True)
 
     # Save the plot if a save path is provided
     if save_path is not None:
         plt.savefig(save_path, dpi=300)
+    
+    plt.show()
 
 
 
