@@ -167,8 +167,8 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     ax.axhspan(hc_mean-0.002, hc_mean+0.002, xmin=0, xmax=mid_point/(len(df.index) - 1.2), color=colors_dark[0], alpha=1)
     ax.axhspan(gpt_mean-0.002, gpt_mean+0.002, xmin=mid_point/(len(df.index) - 1.2), xmax=1, color=colors_dark[1], alpha=1)
 
-    # Add a dotted line for chance level at 25%
-    ax.axhline(y=0.25, linestyle='--', color='black')
+    # Add a thick dotted line at the chance level
+    ax.axhline(y=chance_level(60, alpha=0.05, p = 0.25), color='black', linestyle='--', linewidth=3)
 
     # Set x-ticks
     ax.set_xticks(range(0, len(df.index), 10))
@@ -190,9 +190,6 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     # Save the plot if a save path is provided
     if save_path is not None:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    
-    plt.show()
-
 
 
 def main(): 
