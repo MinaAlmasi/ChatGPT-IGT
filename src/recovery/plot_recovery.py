@@ -16,7 +16,7 @@ def set_font():
         # use times new roman if available
         plt.rcParams['font.family'] = 'Times New Roman'
         # set font size to 13
-        plt.rcParams.update({'font.size': 13})
+        plt.rcParams.update({'font.size': 14})
 
 def chance_level(n, alpha = 0.001, p = 0.5):
     k = binom.ppf(1-alpha, n, p)
@@ -29,9 +29,9 @@ def plot_parameter(ax, df, true_col, infer_col, title, col="#7C7D7C"):
     Helper function to plot parameter recovery.
     '''
     ax.scatter(df[true_col], df[infer_col], c=col)
-    ax.set_title(title)
-    ax.set_xlabel("True Value")
-    ax.set_ylabel("Estimated Value")
+    ax.set_title(title, fontsize=20)
+    ax.set_xlabel("True")
+    ax.set_ylabel("Estimated")
     ax.plot(ax.get_xlim(), ax.get_ylim(), ls="--", c="black")  # Add diagonal line
     m, b = np.polyfit(df[true_col], df[infer_col], 1)
     ax.plot(df[true_col], m*df[true_col] + b, c=col)  # Add regression line
