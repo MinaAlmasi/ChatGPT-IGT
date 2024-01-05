@@ -175,7 +175,7 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     ax.set_xticklabels(range(0, len(df.index), 10))
 
     ax.set_xlabel("Subject")
-    ax.set_ylabel("Choice Estimation Accuracy")
+    ax.set_ylabel("ORL Predicted Choice Accuracy")
 
     ax.set_xlim(-0.5, len(df.index) - 0.5)
 
