@@ -54,7 +54,7 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
         if show_priors and priors:
             prior_samples = priors[param_name](1000)
             sns.kdeplot(prior_samples, ax=ax, color="k", linestyle="--", alpha=0.5)
-
+    
         ax.set_title(param_title)
         ax.set_xlabel("Value")
         ax.set_ylabel("Density")
@@ -68,6 +68,9 @@ def plot_posteriors(hc_data, gpt_data, colors=["#398A20", "#20398A"],
     # Hide the last subplot if the number of parameters is less than total subplots
     if len(parameters) < total_subplots:
         axs[-1, -1].axis('off')
+    
+    if save_path is not None:
+        plt.savefig(save_path, dpi=400, bbox_inches='tight')
 
 
 def plot_hc_posteriors(main_hc_sample, other_hc_samples, 
