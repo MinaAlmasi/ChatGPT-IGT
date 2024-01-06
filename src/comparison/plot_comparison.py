@@ -74,6 +74,9 @@ def savage_dickey_plot_orl(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"
         ax.set_title(name)
         ax.set_xlabel("")
 
+        # fix y-axis to range from 0 to 0.7
+        ax.set_ylim(0, 0.65)
+
         # write Savage-Dickey in plot (in bold)
         ax.text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=ax.transAxes, verticalalignment='top', fontweight='bold')
 
