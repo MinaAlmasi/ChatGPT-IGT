@@ -157,6 +157,9 @@ def plot_multiple_descriptive_adequacies(hc_data, gpt_data, colors = ["#52993C",
     hc_mean = df[df['group'] == 'Humans']['pred_success'].mean()
     gpt_mean = df[df['group'] == 'ChatGPT']['pred_success'].mean()
 
+    print("Humans mean: ", hc_mean)
+    print("ChatGPT mean: ", gpt_mean)
+
     # Calculate the mid-point between the two groups on the x-axis
     mid_point = len(hc_data) - 0.5
 
