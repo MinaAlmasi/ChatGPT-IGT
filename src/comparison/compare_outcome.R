@@ -48,6 +48,12 @@ print(samples$BUGSoutput)
 # save bugs output to txt
 write.table(samples$BUGSoutput$summary, file.path(root_path, "ChatGPT-IGT", "src", "comparison", "results", "outcome_comparison_summary.txt"))
 
+# traceplots
+plotfile <- file.path(root_path, "ChatGPT-IGT", "src", "comparison", "plots", "traceplots", "trace_comparison_outcome.png")
+png(plotfile, width = 2500, height = 2500, res = 400)
+traceplot(samples$BUGSoutput, ask=FALSE, mfrow = c(2, 1), varname=c("mu", "alpha"))
+dev.off()
+
 # extract params
 Y <- samples$BUGSoutput$sims.list
 mu <- Y$mu
