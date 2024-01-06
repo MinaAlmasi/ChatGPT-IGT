@@ -20,7 +20,7 @@ def set_font():
         # set font size to 13
         plt.rcParams.update({'font.size': 15})
 
-def sample_truncated_normal(mean, sd, lower, upper, size=1000):
+def sample_truncated_normal(mean, sd, lower, upper, size=10000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
     return truncnorm.rvs(a, b, loc=mean, scale=sd, size=size)
 
@@ -152,6 +152,9 @@ def main():
     # define paths
     path = pathlib.Path(__file__)
     data_path = path.parents[2] / "src" / "comparison" / "results"
+
+    # set numpy seed
+    np.random.seed(2503)
 
     # load data
     orl_comparison_data = pd.read_csv(data_path / "alpha_params_comparison.csv")
