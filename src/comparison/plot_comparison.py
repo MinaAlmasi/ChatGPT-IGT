@@ -18,7 +18,7 @@ def set_font():
         # use times new roman if available
         plt.rcParams['font.family'] = 'Times New Roman'
         # set font size to 13
-        plt.rcParams.update({'font.size': 13})
+        plt.rcParams.update({'font.size': 15})
 
 def sample_truncated_normal(mean, sd, lower, upper, size=1000):
     a, b = (lower - mean) / sd, (upper - mean) / sd
@@ -74,12 +74,13 @@ def savage_dickey_plot_orl(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"
         ax.set_title(name)
         ax.set_xlabel("")
 
-        # write Savage-Dickey in plot
-        ax.text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=ax.transAxes, verticalalignment='top')
+        # write Savage-Dickey in plot (in bold)
+        ax.text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=ax.transAxes, verticalalignment='top', fontweight='bold')
 
         # only add legend to the first plot
         if i == 0:
-            ax.legend()
+            # place legend centralized at the top of the figure
+            fig.legend(loc='upper center', ncol=2, bbox_to_anchor=(0.5, 0.98), fancybox=True)
 
     # rm empty subplots if the number of parameters is less than the number of subplots
     for j in range(num_params, num_rows * num_cols):
@@ -89,9 +90,9 @@ def savage_dickey_plot_orl(data, parameters=[("alpha_a_rew", "$\\alpha A_{rew}$"
             fig.delaxes(axes)
 
     # adjust layout and save plot if a path is provided
-    plt.tight_layout()
     if save_path is not None:
-        plt.savefig(save_path)
+        plt.savefig(save_path, bbox_inches='tight', dpi=400)
+
 
 def savage_dickey_plot_outcome(data, parameters=[("alpha", "$\\alpha X$")], save_path=None):
     # Define a figure with three subplots
@@ -136,7 +137,7 @@ def savage_dickey_plot_outcome(data, parameters=[("alpha", "$\\alpha X$")], save
         axs[2].set_title(f"Combined {name}")
 
         # Annotate Savage-Dickey density ratio on combined plot
-        axs[2].text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=axs[2].transAxes, verticalalignment='top')
+        axs[2].text(0.05, 0.95, f"BF: {BF[0]:.2f}", transform=axs[2].transAxes, verticalalignment='top', fontweight='bold')
 
     # rm x-labels if needed
     for ax in axs:
@@ -144,7 +145,7 @@ def savage_dickey_plot_outcome(data, parameters=[("alpha", "$\\alpha X$")], save
 
     # save plot if a path is provided
     if save_path is not None:
-        plt.savefig(save_path)
+        plt.savefig(save_path, bbox_inches='tight', dpi=400)
 
 
 def main():
