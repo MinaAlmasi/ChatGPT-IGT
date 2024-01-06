@@ -122,7 +122,7 @@ def plot_hc_posteriors(main_hc_sample, other_hc_samples,
         legend_handles.append(prior_line)
 
     # Create a single legend for the entire figure
-    fig.legend(handles=legend_handles, loc='upper center', ncol=3, bbox_to_anchor=(0.5, 0.98), fancybox=True)
+    fig.legend(handles=legend_handles, loc='upper center', ncol=3, bbox_to_anchor=(0.5, 0.97), fancybox=True)
 
     if save_path is not None:
         plt.savefig(save_path, dpi=400, bbox_inches='tight')
