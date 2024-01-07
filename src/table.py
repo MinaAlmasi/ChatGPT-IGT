@@ -4,7 +4,7 @@ Create table for summary BUGS output
 import pathlib
 import pandas as pd
 
-def make_table(path, round_int=2): 
+def make_table(path, round_int=2, sep=" "): 
     '''
     Make latex table from BUGS output
 
@@ -16,7 +16,7 @@ def make_table(path, round_int=2):
         latex_table: latex table
     '''
     # load data
-    df = pd.read_csv(path, sep=" ")
+    df = pd.read_csv(path, sep=sep)
 
     # round and convert to string
     df = df.round(round_int).astype(str)
@@ -38,6 +38,9 @@ def main():
     compORL_path = path.parents[1] / "src" / "comparison" / "results" / "alpha_params_comparison_summary.txt"
     compOUTCOME_path = path.parents[1] / "src" / "comparison" / "results" / "outcome_comparison_summary.txt"
 
+    # payoff structure
+    payoff_path = path.parents[1] / "utils" / "payoff_scheme_3.csv"
+
     # make latex tables
     ahn_table = make_table(ahn_path)
     gpt_table = make_table(gpt_path)
@@ -45,7 +48,9 @@ def main():
     comp_table = make_table(compORL_path)
     compOUTCOME_table = make_table(compOUTCOME_path)
 
-    print(gpt_table)
+    payoff_table = make_table(payoff_path, round_int=0, sep=",")
+
+    print(payoff_table)
 
     # nb print latex saves a \midrule which is not working in Overleaf. Replace manually with \hline
     
