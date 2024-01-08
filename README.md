@@ -9,7 +9,7 @@
 <hr>
 
 ## About
-This repository contains all data and code for used for the exam investigation *Investigating ChatGPT’s Decision-Making with The Iowa Gambling Task* by Mina Almasi and Anton Drasbæk Schiønning.
+This repository contains all data and code for used for the exam project *Investigating ChatGPT’s Decision-Making with The Iowa Gambling Task* by Mina Almasi and Anton Drasbæk Schiønning.
 
 ## Project Overview
 ### General Overview
@@ -19,7 +19,6 @@ The repository is structured as such:
 | `data/`                   | Contains both the used sample of healthy controls and the ChatGPT data created in this investigation. |
 | `keys/`                  | Placeholder folder for storing OpenAI API keys if wishing to use the pipeline for playing IGT with ChatGPT. |
 | `models/`                  | Contains all JAGS models used in the investigation. |
-| `results/`                | Contains all evaluation results for all three models specified in the paper. |
 | `src/`                    | Contains all Python and R code related to the project. For a detailed overview, refer to the table below (`src` Overview). |
 | `utils/`               | Contains IGT utility files such as the modified payoff structure and task descriptions. |
 
@@ -35,15 +34,15 @@ Each subfolder within `src` contains both code, plots and results (if relevant) 
 | `descriptives/`                  | Code for plotting the behavioral checks, deck switches and preferences.|
 | `estimation/`                  | Code for doing individual group-level estimates and posterior predictive checks. |
 | `recovery/`                | Code for doing both subject-level and hierarhical parameter recovery. Also contains code for simulating the data for the recoveries.|
-| `gpt_simulate.py`                    | Python script for playing the Iowa Gambling Task with ChatGPT in `keys/`.|
-| `prepare_real_data.py`               | Python script for reformatting the human data.|
+| `gpt_simulate.py`                    | Python script for playing the Iowa Gambling Task with ChatGPT. Note API key + ORG ID should be placed in `keys/`.|
+| `prepare_real_data.py`               | Python script for reformatting the human- and GPT data.|
 | `table.py`               | Python script for converting tables into LaTeX formats.|
 
 
 ## Technical Requirements
-The data creation and analysis was run in part via on Ubuntu v22.04.3, Python v3.10.12 (UCloud, Coder Python 1.84.2) and also locally a Macbook Pro ‘13 (2020, 2 GHz Intel i5, 16GB of ram). 
+The data creation and analysis was run in part via Ubuntu v22.04.3, Python v3.10.12 (UCloud, Coder Python 1.84.2) and also locally using a Macbook Pro ‘13 (2020, 2 GHz Intel i5, 16GB of ram). 
 
-Python's venv needs to be installed for the code to run as intended.
+Python's `venv` needs to be installed for the Python code to run as intended. Note that any code requiring `JAGS` is only tested on UCloud (see its setup below).
 
 ## Setup
 Prior to running any code, please run the command below to create a virtual environment (`env`) and install necessary packages within it:
@@ -51,7 +50,7 @@ Prior to running any code, please run the command below to create a virtual envi
 bash setup.sh
 ```
 
-Importantly, running the R scripts with JAGS models requires additional setups that is only tested on Ucloud. This requires the additional setup:
+Importantly, running the R scripts with JAGS models requires additional setups (only tested on UCloud):
 ```
 bash setup_rjags.sh
 ```
