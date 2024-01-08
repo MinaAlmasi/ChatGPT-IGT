@@ -36,7 +36,7 @@ def calculate_deck_switches(data):
 
 def plot_deck_switch_with_confidence(data1, data2, labels, window_size=10, save_path=None):
     # Create a plot
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 8))
 
     # Define colors
     colors = ["#52993C", "#3C5299"]
