@@ -9,19 +9,22 @@
 <hr>
 
 ## About
-This repository contains all data and code for used for the investigation *Investigating ChatGPT’s Decision-Making with The Iowa Gambling Task* for the Decision-Making exam by Mina Almasi and Anton Drasbæk Schiønning.
+This repository contains all data and code for used for the exam investigation *Investigating ChatGPT’s Decision-Making with The Iowa Gambling Task* by Mina Almasi and Anton Drasbæk Schiønning.
 
 ## Project Overview
 ### General Overview
-The repository is structured as such: 
+The repository is structured as such:
 | Folder              | Description |
 |---------------------------|-------------|
 | `data/`                   | Contains both the used sample of healthy controls and the ChatGPT data created in this investigation. |
-| `keys/`                  | Placeholder folder for storing OpenAI API keys if wishing to use the pipeline for playing IGT with ChatGPT |
-| `models/`                  | Contains all JAGS models used in the investigation |
+| `keys/`                  | Placeholder folder for storing OpenAI API keys if wishing to use the pipeline for playing IGT with ChatGPT. |
+| `models/`                  | Contains all JAGS models used in the investigation. |
 | `results/`                | Contains all evaluation results for all three models specified in the paper. |
-| `src/`                    | Contains all Python and R code related to the project. For a detailed overview, refer to the table below (`src` Overview) |
-| `utils/`               | Contains IGT utility files such as the modified payoff structure and task descriptions|
+| `src/`                    | Contains all Python and R code related to the project. For a detailed overview, refer to the table below (`src` Overview). |
+| `utils/`               | Contains IGT utility files such as the modified payoff structure and task descriptions. |
+
+Separate READMEs with further detail are contained within folders where relevant.
+
 
 ### `src` Overview
 Each subfolder within `src` contains both code, plots and results (if relevant) for that subsection.
